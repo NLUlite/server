@@ -292,11 +292,6 @@ static FuzzyPred join_sbar(FuzzyPred root_pred, FuzzyPred sbar_pred)
 	PredTree root_pt = root_pred.pred();
 	PredTree sbar_pt = sbar_pred.pred();
 
-	if (debug) {
-		puts("JOINING_SBAR:::");
-		cout << root_pred << endl;
-		cout << sbar_pred << endl;
-	}
 
 	PredTree::height_iterator hi(sbar_pt, 1);
 	string holder_str = hi->str;
@@ -333,12 +328,6 @@ static FuzzyPred join_sbar(FuzzyPred root_pred, FuzzyPred sbar_pred)
 			root_pt.appendTree(rattach, sbar_pt);
 			vector<string> new_feet = get_feet(root_pt);
 
-			if(debug) {
-				puts("ORIG:::");
-				print_vector(orig_feet);
-				puts("NEW:::");
-				print_vector(new_feet);
-			}
 			if (new_feet != orig_feet) {// check that the order of the feet is the same as the one before the corrections
 				root_pt= orig_pt;
 			} else {
@@ -742,9 +731,6 @@ bool parser::is_sbar_trigger(const FuzzyPred &trigger_pred, const vector<FuzzyPr
 						|| *ipos2->pred().begin() == PTEl("AUX") || *ipos2->pred().begin() == PTEl("MD")) {
 					string verb_str = extract_first_child(*ipos2);
 					string base = find_lemma_of_verb(verb_str);
-					if (debug) {
-						cout << "LEMMA::: " << base << ", " << verb_str << endl;
-					}
 					if (!verb_supports_indirect_obj(base) && !(*boost::prior(ipos) == FuzzyPred("J(such)"))) // "In such a case" does not trigger a SBAR
 						verb_trigger = true;
 					break;
@@ -899,10 +885,6 @@ bool parser::is_sbar_trigger(const FuzzyPred &trigger_pred, const vector<FuzzyPr
 			&& (extract_header(*ipos) == "IN" // any other IN can introduce a verb
 			)
 	) {
-		if (debug) {
-			cout << "Trigger:::: " << trigger_pred << endl;
-			cout << "ipos:::: " << *ipos << endl;
-		}
 		bool verb_trigger = true, aux_trigger = false;
 
 		// check there is a verb before
@@ -1214,9 +1196,6 @@ bool parser::is_closing_nested(vector<FuzzyPred>::iterator ipos, vector<FuzzyPre
 	if(boost::next(ipos) != preds.end() ) {
 		string prior_tag = boost::next(ipos)->pred().begin()->str;
 		string prior_head = boost::next(ipos)->pred().begin().firstChild()->str;
-		if(debug) {
-			cout << "NEXTS::: " << prior_tag << " " << prior_head << endl;
-		}
 
 		if (( (prior_tag == "PRP" && prior_head == "he") || (prior_tag == "PRP" && prior_head == "she")
 			|| (prior_tag == "PRP" && prior_head == "they")
@@ -1250,9 +1229,6 @@ bool parser::is_closing_nested(vector<FuzzyPred>::iterator ipos, vector<FuzzyPre
 	// "to make it work" -> PRN(to make it) work/V is not acceptable
 	if (open_item.pred().begin()->str == "TO" && boost::next(ipos)->pred().begin()->str == "V"
 			&& ipos != preds.begin()) {
-		if(debug) {
-			cout << "TO333::: " << *ipos << endl;
-		}
 		// check it has a verb before
 		bool verb_trigger = false;
 		vector<FuzzyPred>::iterator ipos2 = ipos;
@@ -1268,9 +1244,6 @@ bool parser::is_closing_nested(vector<FuzzyPred>::iterator ipos, vector<FuzzyPre
 			if (ipos2->pred().begin()->str == "V" || *ipos2->pred().begin() == PTEl("VB") // "do we want our forces to be ... ?"
 					|| *ipos2->pred().begin() == PTEl("VBN") || *ipos2->pred().begin() == PTEl("VBG")
 					|| *ipos2->pred().begin() == PTEl("AUX") || *ipos2->pred().begin() == PTEl("MD")) {
-				if(debug) {
-					cout << "TO555::: " << *ipos << endl;
-				}
 				verb_trigger = true;
 				break;
 			}
@@ -1280,9 +1253,6 @@ bool parser::is_closing_nested(vector<FuzzyPred>::iterator ipos, vector<FuzzyPre
 			if(header == "make"
 			   || header == "let"
 					) {
-				if(debug) {
-					cout << "TO444::: " << *ipos << endl;
-				}
 				return false;
 			}
 		}
@@ -1576,9 +1546,6 @@ bool parser::is_closing_nested(vector<FuzzyPred>::iterator ipos, vector<FuzzyPre
 			if (debug)
 				cout << "IN4::: " << *ipos2 << endl;
 		}
-		if(debug) {
-			cout << "IN6:::" << endl;
-		}
 		if (ipos2->pred().begin()->str == "VBG" // a worker participating in a society is fine
 		&& open_item == *ipos2) {
 			return true;
@@ -1586,9 +1553,6 @@ bool parser::is_closing_nested(vector<FuzzyPred>::iterator ipos, vector<FuzzyPre
 		if (ipos != preds.begin()
 				&& (*boost::prior(ipos)->pred().begin() == PTEl("V") || *boost::prior(ipos)->pred().begin() == PTEl("VBG")
 						|| *boost::prior(ipos)->pred().begin() == PTEl("VBN"))) {
-			if(debug) {
-				cout << "IN7:::" << endl;
-			}
 			return true;
 		}
 	}
@@ -1704,10 +1668,6 @@ vector<pair<vector<FuzzyPred>, Memory> > parser::parse(vector<FuzzyPred> data)
 		while (data_list.size() && n++ < 15 && parsed.size() < 1) {
 			current_layer = data_list.at(0).first;
 			last_layer_memory = data_list.at(0).second;
-			if (debug) {
-				std::cout << ">> ";
-				print_vector(current_layer);
-			}
 			new_feet_clauses = get_exact_match(pinfo_->get_roots_clauses_map(), current_layer);
 			if (new_feet_clauses.size() != 0) {
 				root_time = true;
@@ -1774,9 +1734,6 @@ vector<pair<vector<FuzzyPred>, Memory> > parser::parse(vector<FuzzyPred> data)
 			parsed.at(n).first.at(0) = add_possdt(parsed.at(n).first.at(0));
 			if (debug)
 				std::cout << "PHRASE_ITERATION08" << n << endl;
-			if (debug) {
-				std::cout << parsed.at(n).first.at(0) << " -- " << parsed.at(n).second.getEntropy() << std::endl;
-			}
 		}
 	}
 	return parsed;
@@ -1920,11 +1877,6 @@ static string get_prn_str(const FuzzyPred &parsed_prn)
 
 static FuzzyPred join_prn(FuzzyPred parsed, FuzzyPred parsed_prn, const string &prn_str)
 {
-	if(debug) {
-		puts("JOINING_PRN::: ");
-		cout << parsed << endl;
-		cout << parsed_prn << endl;
-	}
 
 
 	PredTree pt(parsed.pred());
@@ -2017,11 +1969,6 @@ void parser::setTags(const vector<FuzzyPred> &tags)
 	}
 
 	tagged_simple_ = simplify_tags(tagged_);
-	if (debug) {
-		puts("STEST:::");
-		print_vector(tagged_);
-		print_vector(tagged_simple_);
-	}
 }
 
 static void sign_no_SBAR(vector<FuzzyPred> &data, const vector<int> &nosbar)
@@ -2101,25 +2048,12 @@ void parser::do_parse()
 		tmp_pred = post_process_sbar(parsed_ones.at(n).first.at(0));
 		if (is_question)
 			tmp_pred = apply_corrections_questions(tmp_pred);
-		if (debug) {
-			cout << "RESTORING1::: " << tmp_pred << endl;
-		}
 		tmp_pred = restore_original_tags(tmp_pred, tagged_); // Substitute the original tags with the simplified ones
-		if (debug) {
-			cout << "RESTORING2::: " << tmp_pred << endl;
-		}
 		parsed_.push_back(make_pair(tmp_pred, parsed_ones.at(n).second.getEntropy()));
 	}
 
 	parsed_.erase(parsed_.begin() + min(parsed_.size(), 10), parsed_.end());
 
-	if (debug && parsed_.size()) {
-		std::cout << "Solutions:\n";
-		int n;
-		for (n = 0; n < parsed_.size(); ++n) {
-			std::cout << parsed_.at(n).first << " -- " << parsed_.at(n).second / parsed_.at(0).second << std::endl;
-		}
-	}
 }
 
 void parser::clear()

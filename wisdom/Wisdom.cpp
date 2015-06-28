@@ -379,10 +379,6 @@ static vector<drt> get_data_from_questions(const vector<drt> &qdrt)
 	for (int n = 0; n < qdrt.size(); ++n) {
 		DrtVect tmp_quest = qdrt.at(n).predicates_with_references();
 		tmp_quest = unname_unifiers(tmp_quest);
-		if (debug) {
-			cout << "QUESTIONS::: ";
-			print_vector(tmp_quest);
-		}
 		drt tmp_drt(tmp_quest);
 		tmp_drt.setText(qdrt.at(n).getText());
 		to_return.push_back(tmp_drt);
@@ -541,9 +537,6 @@ ArbiterAnswer Wisdom::getAnswersFromCandidateQuestion(vector<QuestionVersions> q
 	int timeout = 5;
 
 	clock_t start;
-	if(debug || measure_time) {
-		start = clock();
-	}
 
 	k.setWisdomInfo(wi);
 	Arbiter arbiter(&k,&wi);
@@ -565,10 +558,6 @@ ArbiterAnswer Wisdom::getAnswersFromCandidateQuestion(vector<QuestionVersions> q
 //	rthread.timed_join(boost::posix_time::seconds(timeout) );
 
 
-	if (debug || measure_time) {
-		clock_t end = clock();
-		cout << "Mtime_arbiter::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 
 	return repl_answer;
 }
@@ -679,9 +668,6 @@ ArbiterAnswer Wisdom::match(const string &str, const string &qID)
 	dc.setWisdomInfo(wi_);
 
 	pair<vector<drt>, DrtVect> q = dc.extract_questions();
-	if (debug) {
-		cout << "MATCH_WISDOM:::" << q.first.size() << endl;
-	}
 	if (q.first.size() == 0) {
 		vector<drt> data = dc.extract_data();
 		q.first = create_questions_from_declarations(data);
@@ -694,10 +680,6 @@ ArbiterAnswer Wisdom::match(const string &str, const string &qID)
 	if (answers.size() == 0)
 		repl_answer.setComment(repl_answer_from_question.getComment());
 
-	if (debug) {
-		cout << "MATCH_WISDOM2:::" << answers.size() << endl;
-		cout << "MATCH_WISDOM3:::" << qanswers.size() << endl;
-	}
 
 	answers.insert(answers.end(), qanswers.begin(), qanswers.end());
 	sort(answers.begin(), answers.end(), compare_answers);
@@ -716,9 +698,6 @@ ArbiterAnswer Wisdom::matchDrsWithText(const drt &drs, const string &str, const 
 	if (q.first.size() == 0) {
 		vector<drt> data = dc.extract_data();
 		q.first = create_questions_from_declarations(data);
-	}
-	if (debug) {
-		cout << "MATCH_DRS_WISDOM:::" << q.first.size() << endl;
 	}
 	Match match(&k_);
 	MatchSubstitutions msubs;
@@ -758,11 +737,6 @@ ArbiterAnswer Wisdom::ask(const std::deque<drt> &questions, const string &qID)
 
 	for(;qiter != qend; ++qiter) {
 		qs.push_back(*qiter);
-		if(debug) {
-			std::cout << "QPAIR::: ";
-			DrtVect tmp_drt= qiter->predicates_with_references();
-			print_vector(tmp_drt);
-		}
 	}
 	ArbiterAnswer repl_answer = getAnswersFromAllQuestions(qs, k_, wi_);
 	if (qs.size() != 0) {
@@ -1045,9 +1019,6 @@ void Wisdom::loadString(const string &str)
 	int eof_pos= file.tellg();
 	file.seekg(0, std::ios_base::beg);
 
-	if(debug) {
-		cout << "FILE_LENGTH0::: " << eof_pos << endl;
-	}
 
 	if (!file.bad()) {
 		// std::cerr << "Loading wisdom from client." << std::endl;
@@ -1055,9 +1026,6 @@ void Wisdom::loadString(const string &str)
 		while (length < eof_pos) {
 			length = file.tellg();
 
-			if(debug) {
-				cout << "FILE_LENGTH::: " << length << endl;
-			}
 
 			file.getline(c_line, max_line_length);
 			string line(c_line);
@@ -1175,10 +1143,6 @@ void Wisdom::loadString(const string &str)
 			continue;
 		}
 		tmp_clause = update_references(tmp_clause, load_num_ );
-		if (debug) {
-			cout << "LOADING_CLAUSE::: " << tmp_clause << endl;
-			cout << "CLAUSE_STRING::: " << clause_string << endl;
-		}
 
 		string link = xml_substitutions_backward( clauses_links.at(n) );
 		string text = xml_substitutions_backward( clauses_texts.at(n) );
@@ -1206,9 +1170,6 @@ void Wisdom::loadString(const string &str)
 	////
 
 	k_.addRules(rules);
-	if (debug) {
-		std::cout << "PUTTING_INTO_KNOWLEDGE4:::" << std::flush << endl;
-	}
 
 	// Load the data into the Wisdom class
 
@@ -1261,11 +1222,6 @@ void Wisdom::loadString(const string &str)
 		tmp_drs = update_references(tmp_drs, load_num_ );
 		////
 
-//		if (debug) {
-//			std::cerr << "LOADING_DRS::: " << n << endl;
-//			print_vector(tmp_drs);
-//			std::cerr << "DRS_STRING::: " << data.at(n) << endl;
-//		}
 
 		drt tmp_drt(tmp_drs);
 		link = xml_substitutions_backward( data_links.at(n) );

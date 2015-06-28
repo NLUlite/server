@@ -398,9 +398,6 @@ vector<KnowledgeAnswer> solver::arbiterStep(drt question)
 
 	int max_level = min(standard_max_level,wi_->getAccuracyLevel());
 
-	if(debug) {
-		cout << "MAX_LEVEL:::" << max_level << endl;
-	}
 
 	int approx_level = 5;
 	if (yn_question)
@@ -423,26 +420,14 @@ vector<KnowledgeAnswer> solver::arbiterStep(drt question)
 			break;
 
 
-		if(debug) {
-			cout << "STIMEOUT03::: " << wi_->getTimeout() << endl;
-		}
 
 		pair<drt, DrtMgu> answer_pair = relax_conditions_in_question_at_level(question, mgu, n);
 		question = answer_pair.first;
 		mgu = answer_pair.second;
 
-		if (debug) {
-			cout << "SOLVER_QUESTION::: " << n << endl;
-			DrtVect tmppreds = question.predicates_with_references();
-			print_vector(tmppreds);
-			cout << mgu << endl;
-		}
 
 		// Finds the answers by searching in the knowledge
 		clock_t start;
-		if(debug || measure_time) {
-			start = clock();
-		}
 
 		vector<KnowledgeAnswer> tmp_answers;
 		if(n == 0) {
@@ -454,10 +439,6 @@ vector<KnowledgeAnswer> solver::arbiterStep(drt question)
 			tmp_answers = k_->getAnswers(question);
 		}
 
-		if (debug || measure_time ) {
-			clock_t end = clock();
-			cout << "Mtime_arbiter_knowledge::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-		}
 
 		to_return.insert(to_return.end(), tmp_answers.begin(), tmp_answers.end());
 
@@ -531,9 +512,6 @@ double solver::is_match(const vector<vector<DrtPred> > &hyps, DrtMgu *retDrtMgu,
 
 	while (hpos < hsize && hpos >= 0) {
 
-		if(debug) {
-			cout << "STIMEOUT::: " << wi_->getTimeout() << endl;
-		}
 		if(wi_->getTimeout() < 0)
 			break;
 
@@ -565,9 +543,6 @@ double solver::is_match(const vector<vector<DrtPred> > &hyps, DrtMgu *retDrtMgu,
 			answers = this->arbiterStep(question);
 			//answers = k_->getAnswers(question);
 
-			if(debug) {
-				cout << "SOLVER_ANSWERS::: " << answers.size() << endl;
-			}
 
 			back_pairs.at(hpos).get<0>() = answers;
 		}
@@ -764,13 +739,6 @@ vector<DrtVect> solver::updateCurrentLayer(const Level &current_layer, DrtVect q
 					//|| head == "time"
 			) {
 				string new_name = all_names.at(0);
-				if(debug) {
-					cout << "SOLVER_ALL_NAMES::: ";
-					print_vector(all_names);
-					print_vector(question);
-					print_vector(drtvect);
-					cout << "UPG:::" << upg ;
-				}
 
 				if (new_name == "[any]")
 					new_name = "[*]";
@@ -817,9 +785,6 @@ void solver::do_solve()
 			puts("Empty Clauses!!");
 		return;
 	}
-	if (debug) {
-		cout << "CLAUSES_NUM::: " << new_feet_clauses.size()  << endl;
-	}
 
 	// cycles through the inferences steps
 	int i;
@@ -853,34 +818,14 @@ void solver::do_solve()
 	for (int m = 0; m < data_list.size(); ++m) {
 		current_layer = data_list.at(m);
 		vector<DrtVect> qvect = this->updateCurrentLayer(current_layer, question_);
-		if (debug) {
-			puts("LAYERS:::");
-			cout << n << endl;
-			for (int j = 0; j < qvect.size(); ++j) {
-				print_vector(qvect.at(j));
-			}
-		}
 		path_memory mem_tmp = current_layer.getMemory();
 		upg.clear();
 		vector<drt> tmp_drts;
 
 		clock_t start;
-		if (debug || measure_time) {
-			start = clock();
-		}
-		if(debug) {
-			cout << "STIMEOUT01::: " << wi_->getTimeout() << endl;
-		}
 		double w = is_match(qvect, &upg, &tmp_drts, mem_tmp);
-		if(debug) {
-			cout << "STIMEOUT02::: " << wi_->getTimeout() << endl;
-		}
 		if(wi_->getTimeout() < 0 )
 			break;
-		if (debug || measure_time) {
-			clock_t end = clock();
-			cout << "Mtime_is_match::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-		}
 
 		if (debug)
 			cout << "SOLVER22:::" << w << endl;
@@ -894,9 +839,6 @@ void solver::do_solve()
 		}
 	}
 
-	if(debug) {
-		cout << "STIMEOUT1::: " << wi_->getTimeout() << endl;
-	}
 
 	/// MULTIPLE LEVELS IN THE NEXT VERSION!!! (NOW IT IS TOO SLOW TO DEPLOY)
 	// vector<Level> tmp_vect;
@@ -906,20 +848,10 @@ void solver::do_solve()
 	// 	  vector<drt> tmp_drts;
 	//      vector<DrtVect> qvect= this->updateCurrentLayer(current_layer,question_);
 	//      //vector<DrtVect> qvect= current_layer.getData();
-	//      if (debug) {
-	//           puts("LAYERS:::");
-	//           cout << n << endl;
-	//           for (int j = 0; j < qvect.size(); ++j) {
-	//                print_vector(qvect.at(j));
-	//           }
-	//      }
 	//      path_memory mem_tmp = current_layer.getMemory();
 	//      double w=0;
 	//      if(mem_tmp.getDepth() > 0)
 	//           w = is_match(qvect, &upg, &tmp_drts, mem_tmp);
-	//      if (debug) {
-	//           cout << "L_W:::" << w << endl;
-	//      }
 	//      //bool add_new_clauses= true;
 	// 	  if( w != 0 ) {
 	// 	       mem_tmp.last_upg(upg);

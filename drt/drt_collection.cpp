@@ -412,9 +412,6 @@ void ParserThread::operator()()
 	while (num < input_->size() && num < output_->size()) {
 		num = counter_->getCurrentNumber();
 
-		if (debug) {
-			std::cerr << "NUM::: " << num << endl;
-		}
 
 		if (num == -1)
 			break;
@@ -474,18 +471,12 @@ void drt_collection::init(string &text)
 	vector<string> text_vect;
 	for (int n = 0; n < phrases_text.size() && n < punctuation.size(); ++n) {
 		int size_tmp = phrases_text.at(n).size();
-		if (debug) {
-			cout << "PHRASES::: " << phrases_text.at(n) << endl;
-		}
 		if (size_tmp > 1) {
 			string punct = ".";
 			if (n < punctuation.size())
 				punct = punctuation.at(n);
 			if (punct == "!" || punct == ";" || punct == ":")
 				punct = ".";
-			if (debug) {
-				cout << "PHRASES_PUNCT::: " << punct << endl;
-			}
 			phrases_text.at(n).insert(size_tmp, punct);
 			text_vect.push_back(post_clean_text(phrases_text.at(n)));
 			++num_sentences;
@@ -501,9 +492,6 @@ void drt_collection::init(string &text)
 
 	int num_threads = min(num_sentences, max_threads);
 
-	if (debug) {
-		std::cerr << "NUM_THR::: " << num_threads << endl;
-	}
 
 	vector<Context> context_vect(num_sentences, context);
 	vector<phrase_versions> all_phrases(num_sentences);
@@ -559,10 +547,6 @@ void drt_collection::init(string &text)
 		drt_collection_.at(n).add_references(phrase_references.at(n));
 	}
 
-	if (debug) {
-		clock_t end = clock();
-		cout << "Mtime8::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 
 	// Find allocution references
 	connect_allocution_references();
@@ -746,10 +730,6 @@ static vector<drt> erase_inclusions(const vector<drt> &drts)
 			}
 		}
 	}
-	if (debug) {
-		puts("TO_ERASE::");
-		print_vector(to_erase);
-	}
 	for (int n = 0; n < drts.size(); ++n) {
 		if (!shortfind(to_erase, n))
 			to_return.push_back(drts.at(n));
@@ -784,19 +764,11 @@ static vector<drt> get_linked_drts_from_single_drt(const drt &d, const string &l
 	int n = 0;
 	vector<DrtPred> previous_elements;
 	//previous_elements.push_back("@DUMMY(dummy)");
-	if (debug) {
-		puts("DRS_ATTACHED0");
-		print_vector(drtvect);
-	}
 	for (; diter != dend; ++diter, ++n) {
 		if (diter->is_verb() && !shortfind(previous_elements, *diter)) {
 			DrtVect tmp_drtvect = find_all_attached_to_verb(drtvect, n);
 			if (tmp_drtvect.size() == 1)  // not interested in lonely verbs
 				continue;
-			if (debug) {
-				puts("DRS_ATTACHED2");
-				print_vector(tmp_drtvect);
-			}
 			tmp_drtvect= sign_intersection_words(previous_elements, tmp_drtvect);
 			drt_sort(tmp_drtvect);
 			unique(tmp_drtvect.begin(), tmp_drtvect.end());
@@ -810,13 +782,6 @@ static vector<drt> get_linked_drts_from_single_drt(const drt &d, const string &l
 	}
 	to_return = erase_inclusions(to_return);
 
-	if (debug) {
-		puts("DRS_ATTACHED3:::");
-		for (int n = 0; n < to_return.size(); ++n) {
-			DrtVect dv = to_return.at(n).predicates_with_references();
-			print_vector(dv);
-		}
-	}
 
 	return to_return;
 }
@@ -878,9 +843,6 @@ vector<drt> drt_collection::compute_data()
 			pres_pairs.push_back(make_pair(pres_drtvect, text));
 			vector<drt> drts_tmp = get_linked_drts_from_single_drt(tmp_drt, link_, text); // It also computes the Levins within the function;
 
-			if(debug) {
-				cout << "LINK3::: " << link_ << endl;
-			}
 
 			ret_drts.insert(ret_drts.end(), drts_tmp.begin(), drts_tmp.end());
 			for (int n = 0; n < drts_tmp.size(); ++n) {
@@ -890,10 +852,6 @@ vector<drt> drt_collection::compute_data()
 		}
 	}
 
-	if (debug) {
-		clock_t end = clock();
-		cout << "Mtime4::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 
 	if (debug)
 		start = clock();
@@ -902,10 +860,6 @@ vector<drt> drt_collection::compute_data()
 	personae.compute();
 	personae_ = personae;
 
-	if (debug) {
-		clock_t end = clock();
-		cout << "Mtime5::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 
 	if (debug)
 		start = clock();
@@ -924,10 +878,6 @@ vector<drt> drt_collection::compute_data()
 	pres_personae.compute();
 	personae_.addPersonae(pres_personae);
 
-	if (debug) {
-		clock_t end = clock();
-		cout << "Mtime6::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 
 	return ret_drts;
 }
@@ -1213,9 +1163,6 @@ static DrtVect clean_duplicate_elements(const DrtVect &orig_drtvect)
 		std::stringstream ss;
 		ss << orig_drtvect.at(n);
 		string item = ss.str();
-		if(debug) {
-			cout << "ORIG_DUPL::: " << orig_drtvect.at(n) << " " << shortfind(already_parsed, item) << endl;
-		}
 		if (!shortfind(already_parsed, item) ) {
 			drtvect.push_back(item);
 			already_parsed.push_back(item);
@@ -1296,10 +1243,6 @@ vector<clause_vector> drt_collection::extract_clauses()
 			all_predicates = post_process_drtvect(all_predicates);
 			DrtVect cons = get_clause_consequence(all_predicates);
 
-			if(debug) {
-				puts("CLAUSE_CONS:::");
-				print_vector(cons);
-			}
 
 			vector<vector<DrtPred> > hyp = get_all_clause_hypothesis(all_predicates);
 			cons = clean_duplicate_elements(cons);
@@ -1349,9 +1292,6 @@ vector<clause_vector> drt_collection::extract_clauses()
 	rules_ = rules;
 
 	for (int n = 0; n < ret_data.size(); ++n) {
-		if (debug) {
-			cout << "EXTRACT_CLAUSE::: " << ret_data.at(n) << endl;
-		}
 	}
 
 	return ret_data;
@@ -1456,9 +1396,6 @@ pair<vector<drt>, vector<DrtPred> > drt_collection::compute_questions()
 				tmp_quest = trim_auxiliaries(tmp_quest); // erase the auxiliaries
 				tmp_quest = name_unifiers(tmp_quest);
 				tmp_quest = adjust_WP(tmp_quest);
-				if(debug) {
-					cout << "ADDING_IMPLICIT::: " << wi_.getImplicitVerb() << endl;
-				}
 				if(wi_.getImplicitVerb() ) {
 					tmp_quest = add_verb_if_needed(tmp_quest);
 				}
@@ -1501,11 +1438,6 @@ vector< QuestionVersions > drt_collection::compute_candidate_questions()
 					continue; // the question has a grammatical mistake
 				drt drt_tmp = ph.get_drt();
 
-				if(debug) {
-					puts("CANDIDATE_QUESTIONS:::");
-					DrtVect drtvect = drt_tmp.predicates_with_references();
-					print_vector(drtvect);
-				}
 
 				drt_tmp.apply_phrase_number(global_num_); // apply the global reference number to the drts
 				drt_tmp.setText(ph.get_text());
@@ -1554,9 +1486,6 @@ vector< QuestionVersions > drt_collection::compute_candidate_questions()
 					tmp_quest = trim_auxiliaries(tmp_quest); // erase the auxiliaries
 					tmp_quest = name_unifiers(tmp_quest);
 					tmp_quest = adjust_WP(tmp_quest);
-					if(debug) {
-						cout << "ADDING_IMPLICIT::: " << wi_.getImplicitVerb() << endl;
-					}
 					if(wi_.getImplicitVerb() ) {
 						tmp_quest = add_verb_if_needed(tmp_quest);
 					}

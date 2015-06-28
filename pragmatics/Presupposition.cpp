@@ -210,9 +210,6 @@ static vector<DrtVect> process_material_adj(const DrtVect &drtvect)
 					|| d->hypernym_dist(head, "metal", 8) > 0.5) { // the adjective is a material
 					//cout << d->hypernym_dist(head, "material", 8) << endl;
 					//cout << d->hypernym_dist(head, "metal", 8) << endl;
-				if(debug) {
-					cout << "MATERIAL::: " << head << " " << endl;
-				}
 
 				map_ref[ref].push_back(drtvect.at(n));
 				refs.push_back(ref);
@@ -547,27 +544,15 @@ static vector<DrtVect> process_nouns_from_verbs(DrtVect to_return)
 		string tag = to_return.at(n).tag();
 		if (tag == "RB" && head == "well"
 		) {
-			if(debug) {
-				cout << "IS_WELL::: " << to_return.at(n) << endl;
-			}
 			int m = find_verb_with_string(to_return, fref);
 			if (m == -1)
 				continue;
-			if(debug) {
-				cout << "IS_VERB1::: " << to_return.at(m) << endl;
-			}
 			string subj_ref = extract_subject(to_return.at(m) );
 			int m2= find_element_with_string(to_return,subj_ref);
 			if (m2 == -1)
 				continue;
-			if(debug) {
-				cout << "IS_VERB2::: " << to_return.at(m2) << endl;
-			}
 			string verb_str= extract_header(to_return.at(m));
 			string noun_str= d->getNounFromVerb(verb_str);
-			if(debug) {
-				cout << "IS_VERB3::: " << verb_str << " " << noun_str << endl;
-			}
 			if(noun_str == "")
 				continue;
 			to_return2.push_back( create_have_good_sentence(to_return.at(m2), noun_str, has_negation(to_return.at(m),to_return), n ) );
@@ -829,10 +814,6 @@ static pair<vector<DrtVect>, vector<DrtPred> > process_question_expand_genitive(
 			}
 		}
 	}
-	if(debug) {
-		cout << "PRESUPP_WITH::: ";
-		print_vector(drtvect);
-	}
 	to_return.push_back(drtvect);
 	sort(to_return.begin(), to_return.end());
 	to_return.erase(std::unique(to_return.begin(), to_return.end()), to_return.end());
@@ -865,18 +846,11 @@ static pair<vector<DrtVect>, vector<DrtPred> > process_question_verbless(DrtVect
 		drtvect.at(0).set_question(false);
 		DrtVect tmp_drtvect;
 
-		if(debug) {
-			cout << "PHEADER::: " << extract_header(what_pred) << endl;
-		}
 
 		tmp_drtvect.push_back(what_pred);
 		tmp_drtvect.push_back(be_pred);
 		tmp_drtvect.insert(tmp_drtvect.end(),drtvect.begin(),drtvect.end() );
 		drtvect = tmp_drtvect;
-	}
-	if(debug) {
-		cout << "PRESUPP_VERBLESSs::: ";
-		print_vector(drtvect);
 	}
 	to_return.push_back(drtvect);
 	return make_pair(to_return, conjunctions);
@@ -928,9 +902,6 @@ static vector<DrtPred> switch_dative(const vector<DrtPred> &pre_drt, int pos_ver
 
 	int n = find_complement_with_first_tag(pre_drt, extract_first_tag(pre_drt.at(pos_verb)), "@DATIVE" );
 
-	if(debug) {
-		cout << "FIND_COMPLEMENT::: " << n << endl;
-	}
 
 	if (n == -1)
 		return pre_drt;
@@ -1641,16 +1612,10 @@ static vector<DrtVect> process_genitive_to_have(DrtVect drtvect)
 			if (d->pertains_to_name(head, "color", 6) > 0.5
 				|| d->hypernym_dist(head, "color", 8) > 0.5
 			) {
-				if(debug) {
-					cout << "PHAVE1::: " << drtvect.at(n) << endl;
-				}
 				string oref = extract_first_tag(drtvect.at(n));
 				int mverb = find_verb_with_object(drtvect,oref);
 				if(mverb == -1)
 					continue;
-				if(debug) {
-					cout << "PHAVE2::: " << drtvect.at(mverb) << endl;
-				}
 				int msubj = find_int_subject_of_verb(drtvect,mverb);
 				if(msubj == -1)
 					continue;
@@ -1658,15 +1623,9 @@ static vector<DrtVect> process_genitive_to_have(DrtVect drtvect)
 				int mcompl = find_complement_with_first_tag(drtvect,sref,"@GENITIVE");
 				if(mcompl == -1)
 					continue;
-				if(debug) {
-					cout << "PHAVE3::: " << drtvect.at(mcompl) << endl;
-				}
 				int mgen = find_element_with_string(drtvect,extract_second_tag(drtvect.at(mcompl)) );
 				if(mgen == -1)
 					continue;
-				if(debug) {
-					cout << "PHAVE4::: " << drtvect.at(mgen) << endl;
-				}
 				item_genitive_adj_vect.push_back(make_tuple(drtvect.at(msubj),drtvect.at(mgen),drtvect.at(n) ) );
 			}
 		}
@@ -1691,10 +1650,6 @@ static vector<DrtVect> process_genitive_to_have(DrtVect drtvect)
 		tmp_drt.push_back(adj_pred);
 		tmp_drt.push_back(item_pred);
 		to_return.push_back(tmp_drt);
-		if (debug) {
-			puts("PRESUPP_HAVE:::");
-			print_vector(tmp_drt);
-		}
 	}
 
 	return to_return;
@@ -1776,10 +1731,6 @@ void Presupposition::compute()
 			drt tmpdrt(tmp_drtpreds.at(n));
 			tmpdrt.setQuestionList(ql);
 			tmp_drts.push_back(tmpdrt);
-			if (debug) {
-				puts("IMPLIED_QUESTIONS:::");
-				print_vector(tmp_drtpreds.at(n));
-			}
 		}
 
 		answers_.insert(answers_.end(), tmp_drts.begin(), tmp_drts.end());
@@ -1811,10 +1762,6 @@ void Presupposition::compute()
 
 		for (int n = 0; n < tmp_drtpreds.size(); ++n) {
 			// new predicates are created, they need to have the original text in the drt
-			if (debug) {
-				puts("PRESUPPOSITION_SENTENCE:::");
-				print_vector(tmp_drtpreds.at(n));
-			}
 			drt tmpdrt(tmp_drtpreds.at(n));
 			tmpdrt.setText(orig_drt_.getText());
 			tmp_drts.push_back(tmpdrt);

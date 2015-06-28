@@ -322,10 +322,6 @@ vector<T> Engine::getList(const string &list_str)
 		CodePred result = this->run(code);
 		PredTree ptree = result.pred();
 		PredTree::children_iterator pi = ptree.begin();
-		if (debug) {
-			puts("RESULT2:::");
-			cout << result << endl;
-		}
 		for (; pi != ptree.end(); ++pi) {
 			stringstream ss;
 			ss << CodePred(pi);
@@ -349,10 +345,6 @@ template<> vector<int> Engine::getList<int>(const string &list_str)
 		CodePred result = this->run(code);
 		PredTree ptree = result.pred();
 		PredTree::children_iterator pi = ptree.begin();
-		if (debug) {
-			puts("RESULT2:::");
-			cout << result << endl;
-		}
 		for (; pi != ptree.end(); ++pi) {
 			stringstream ss;
 			ss << CodePred(pi);
@@ -391,10 +383,6 @@ template<> vector<KnowledgeAnswer> Engine::getList<KnowledgeAnswer>(const string
 		CodePred code(list_str);
 		CodePred result = this->run(code);
 		PredTree ptree = result.pred();
-		if (debug) {
-			puts("RESULT2:::");
-			cout << result << endl;
-		}
 		PredTree::children_iterator sitem = ptree.begin();
 		vector<KnowledgeAnswer> kav;
 		for (; sitem != ptree.end(); ++sitem) {
@@ -403,9 +391,6 @@ template<> vector<KnowledgeAnswer> Engine::getList<KnowledgeAnswer>(const string
 			PredTree::children_iterator si = ptree_item.begin();
 			bool to_insert = false;
 			for (; si != ptree.end(); ++si) {
-				if (debug) {
-					cout << "ELEM::: " << si->str << endl;
-				}
 				if (si->str == "preds") {
 					PredTree ptree2 = PredTree(si);
 					PredTree::children_iterator si2 = ptree2.begin();
@@ -510,10 +495,6 @@ CodePred Engine::run(CodePred code)
 		if (debug )
 			start = clock();
 		subtree = instruction->transform(subtree, this);
-		if (debug ) {
-			clock_t end = clock();
-			cout << "Mtime2-TRANSF::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-		}
 
 		pt = subtree;
 		if (has_period && strs.size() > 1 && strs.at(0) == pt.begin()->str)
@@ -538,20 +519,12 @@ PredTree Engine::IsHypernym::transform(PredTree pt, Engine *e)
 
 	metric *d = metric_singleton::get_metric_instance();
 
-	if (debug) {
-		puts("HYPERNYM:::");
-		cout << fstr << " " << sstr << endl;
-	}
 	if (fstr == "" && sstr == "")
 		return Engine::pt_false;
 	clock_t start;
 	if (debug )
 		start = clock();
 	double dist = d->hypernym_dist(fstr, sstr, 6);
-	if (debug ) {
-		clock_t end = clock();
-		cout << "Mtime2-HYP::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 	if (dist > 0.2)
 		return Engine::pt_true;
 	return Engine::pt_false;
@@ -609,9 +582,6 @@ PredTree Engine::Repeat::transform(PredTree pt, Engine *e)
 	try {
 		num = boost::lexical_cast<int>(fstr);
 	} catch (std::exception &e) {
-		if (debug) {
-			std::cerr << e.what() << endl;
-		}
 		return Engine::pt_false;
 	}
 	for (int n = 0; n < num; ++n)
@@ -840,10 +810,6 @@ PredTree Engine::GetNamesFromRef::transform(PredTree pt, Engine *e)
 	names = k->getNamesFromRef(fstr);
 	tempnames = k->getTempNamesFromRef(fstr);
 
-	if (debug) {
-		puts("NAMES_ENGINE:::");
-		print_vector(names);
-	}
 	names.insert(names.end(), tempnames.begin(), tempnames.end());
 	int size = names.size();
 	for (int n = 0; n < size; ++n) {
@@ -960,18 +926,9 @@ PredTree Engine::ForEach::transform(PredTree pt, Engine *e)
 		}
 		size = list_pt.begin().num_children();
 	} else {
-		if (debug) {
-			puts("SSTR2::");
-			cout << sstr << endl;
-		}
 		vector<string> names;
 		boost::split(names, sstr, boost::is_any_of("|"));
 		size = names.size();
-		if (debug) {
-			puts("ALL_NAMES::");
-			cout << sstr << endl;
-			print_vector(names);
-		}
 		for (int n = 0; n < size; ++n) {
 			preds.push_back(Predicate(names.at(n)).pred());
 		}
@@ -1321,9 +1278,6 @@ PredTree Engine::Equal::transform(PredTree pt, Engine *e)
 		return Engine::pt_false;
 	CodePred result1 = e->run(CodePred(pi.firstChild()));
 	CodePred result2 = e->run(CodePred(pi.lastChild()));
-	if(debug) {
-		cout << "RESULT_EQUAL::: " << result1 << " " << result2 << endl;
-	}
 	if (result1.pred() != Engine::pt_nil && result2.pred() != Engine::pt_nil && result1 == result2) {
 		return Engine::pt_true;
 	} else
@@ -1654,9 +1608,6 @@ PredTree Engine::IsCandidateVerb::transform(PredTree pt, Engine *e)
 	PredTree dx_tree = result3.pred();
 	string tag_str = dx_tree.begin()->str;
 	noun_str = noun_str.substr(0, noun_str.find("/"));
-	if (debug) {
-		cout << "IS-CANDIDATE-VERB::: " << noun_str << endl;
-	}
 	tagger *t = parser_singleton::get_tagger_instance();
 	tagger_info *info = t->get_info();
 	string base = info->get_conj(noun_str, tag_str);
@@ -1675,16 +1626,10 @@ string Engine::GetLemma::getWakeUpString()
 PredTree Engine::GetLemma::transform(PredTree pt, Engine *e)
 {
 	PredTree::iterator pi = pt.begin();
-	if(debug) {
-		cout << "LEMMA0:: " << Predicate(pt) << " " << endl;
-	}
 	if (pi.num_children() == 2) {
 		CodePred result = e->run(CodePred(pi.firstChild()));
 		PredTree sx_tree = result.pred();
 		string noun_str = sx_tree.begin()->str;
-		if (debug) {
-			cout << "LEMMA1:: " << noun_str << " " << endl;
-		}
 		noun_str = noun_str.substr(0, noun_str.find("/"));
 		noun_str = noun_str.substr(0, noun_str.find(":"));
 		CodePred result3 = e->run(CodePred(pi.lastChild()));
@@ -1693,9 +1638,6 @@ PredTree Engine::GetLemma::transform(PredTree pt, Engine *e)
 		tagger *t = parser_singleton::get_tagger_instance();
 		tagger_info *info = t->get_info();
 		string base = info->get_conj(noun_str, tag_str);
-		if (debug) {
-			cout << "LEMMA:: " << noun_str << " " << tag_str << endl;
-		}
 		if (base == "")
 			base = noun_str;
 		return CodePred(base).pred();
@@ -1703,18 +1645,12 @@ PredTree Engine::GetLemma::transform(PredTree pt, Engine *e)
 		CodePred result = e->run(CodePred(pi.firstChild()));
 		PredTree sx_tree = result.pred();
 		string noun_str = sx_tree.begin()->str;
-		if (debug) {
-			cout << "LEMMA1:: " << noun_str << " " << endl;
-		}
 		string tag_str = noun_str.substr(noun_str.find("/")+1,noun_str.size());
 		noun_str = noun_str.substr(0, noun_str.find("/"));
 		noun_str = noun_str.substr(0, noun_str.find(":"));
 		tagger *t = parser_singleton::get_tagger_instance();
 		tagger_info *info = t->get_info();
 		string base = info->get_conj(noun_str, tag_str);
-		if (debug) {
-			cout << "LEMMA:: " << noun_str << " " << tag_str << endl;
-		}
 		if (base == "")
 			base = noun_str;
 		return CodePred(base).pred();
@@ -1735,9 +1671,6 @@ PredTree Engine::IsCandidateAdjective::transform(PredTree pt, Engine *e)
 		PredTree sx_tree = result.pred();
 		string noun_str = sx_tree.begin()->str;
 		noun_str = noun_str.substr(0, noun_str.find("/"));
-		if (debug) {
-			cout << "IS-CANDIDATE-ADJ::: " << noun_str << endl;
-		}
 		metric *d = metric_singleton::get_metric_instance();
 		if (d->is_adjective(noun_str))
 			return Engine::pt_true;
@@ -1752,9 +1685,6 @@ PredTree Engine::IsCandidateAdjective::transform(PredTree pt, Engine *e)
 		tagger *t = parser_singleton::get_tagger_instance();
 		tagger_info *info = t->get_info();
 		string base = info->conjugate(noun_str, tag_str);
-		if (debug) {
-			cout << "IS-CANDIDATE-ADJ2::: " << noun_str << " " << base << endl;
-		}
 		metric *d = metric_singleton::get_metric_instance();
 		if (d->is_adjective(base))
 			return Engine::pt_true;
@@ -1778,9 +1708,6 @@ PredTree Engine::IsCandidateAdverb::transform(PredTree pt, Engine *e)
 	PredTree sx_tree = result.pred();
 	string noun_str = sx_tree.begin()->str;
 	noun_str = noun_str.substr(0, noun_str.find("/"));
-	if (debug) {
-		cout << "IS-CANDIDATE-ADV::: " << noun_str << endl;
-	}
 	metric *d = metric_singleton::get_metric_instance();
 	if (d->is_adverb(noun_str))
 		return Engine::pt_true;
@@ -1810,12 +1737,6 @@ PredTree Engine::Ask::transform(PredTree pt, Engine *e)
 	DrtVect orig_drt = create_drtvect(ss.str());
 	vector<DrtVect> all_drts = get_linked_drtvect_from_single_drtvect(orig_drt);
 
-	if (debug) {
-		puts("DRTVECT:::");
-		stringstream ss3;
-		print_vector_stream(ss3, orig_drt);
-		cout << ss3.str() << endl;
-	}
 
 	if (all_drts.size() == 0)
 		return Engine::pt_nil;
@@ -1875,9 +1796,6 @@ PredTree Engine::FirstChild::transform(PredTree pt, Engine *e)
 {
 	PredTree::iterator pi = pt.begin();
 
-	if (debug) {
-		cout << "FIRST_CHILD::: " << Predicate(pt) << endl;
-	}
 
 	CodePred result = e->run(CodePred(pi.firstChild()));
 	if (result.pred().height() > 1) {
@@ -2004,9 +1922,6 @@ PredTree Engine::IsCandidateNoun::transform(PredTree pt, Engine *e)
 	string base = info->get_conj(candidate_str, tag_str);
 	if (base == "")
 		base = candidate_str;
-	if (debug) {
-		cout << "CANDIDATE_NOUN:::" << base << endl;
-	}
 	if (base == "" && (tag_str == "VB" || tag_str == "VBP" || tag_str == "NN" || tag_str == "NNP"))
 		base = candidate_str;
 	if (info->is_candidate_name(base))
@@ -2172,9 +2087,6 @@ PredTree Engine::MatchAndSubstitute::transform(PredTree pt, Engine *e)
 
 		Upg upg;
 		bool has_unified = tmp_pred.unify(from_pred, &upg);
-		if (debug) {
-			cout << "UPG::: " << upg << " " << has_unified << endl;
-		}
 		if (!has_unified)
 			return Engine::pt_false;
 		to_pt / upg;

@@ -1534,9 +1534,6 @@ vector<int> tagger_info::find_wikidata_q(const string &key, const string &tag)
 {
 	vector<int> to_return;
 
-	if(debug) {
-		cout << "WIKI_KEY::: " << key << endl;
-	}
 
 	TMapStVInt::iterator miter = q_values_.find(key);
 	if (miter != q_values_.end()) {

@@ -98,9 +98,6 @@ vector<KnowledgeAnswer> knowledge_unique(const vector<KnowledgeAnswer> &preds)
 
 	for (int n = 0; n < preds.size(); ++n) {
 		if (preds.at(n).getWeigth() < 0.01) {
-			if(debug) {
-				cout << "KAV_W::: " << preds.at(n).getWeigth() << endl;
-			}
 			to_return.push_back( preds.at(n) );
 		}
 	}
@@ -179,9 +176,6 @@ ArbiterItem Arbiter::processComment(vector<KnowledgeAnswer> kav, vector<drt> &dq
 		}
 	}
 
-	if (debug) {
-		cout << "REPL::: " << qlist.size() << endl;
-	}
 
 	drt dquest = dquest_vect.at(0);
 	DrtVect question = dquest.predicates();
@@ -228,10 +222,6 @@ ArbiterItem Arbiter::processComment(vector<KnowledgeAnswer> kav, vector<drt> &dq
 	answer.insert("_NEGATED_QUESTION", negated_question);
 
 	clock_t start;
-	if (debug || measure_time) {
-		cout << "Mtime_negated_answers0::: " << endl;
-		start = clock();
-	}
 
 	answer.insert("_YES_DRS", yes_drs);
 	answer.insert("_NO_DRS", no_drs);
@@ -244,18 +234,7 @@ ArbiterItem Arbiter::processComment(vector<KnowledgeAnswer> kav, vector<drt> &dq
 	Engine engine(k_);
 	CodePred result = engine.run(answer);
 
-	if (debug || measure_time) {
-		clock_t end = clock();
-		cout << "Mtime_negated_answers::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-		cout << "NTIMEOUT::: " << wi_->getTimeout() << endl;
-	}
 
-	if (debug) {
-		cout << "KAV:::" << yn_question << endl;
-		stringstream ss;
-		engine >> ss;
-		cout << "KAV2:::" << ss.str() << endl;
-	}
 	DrtVect comment_drt = engine.getList<DrtPred>("answer");
 	vector<KnowledgeAnswer> new_kav;
 	try {
@@ -265,9 +244,6 @@ ArbiterItem Arbiter::processComment(vector<KnowledgeAnswer> kav, vector<drt> &dq
 	}
 
 	// Fill the answer structure
-	if(debug) {
-		cout << "KAV_SIZE::: " << new_kav.size() << endl;
-	}
 	ArbiterItem ri;
 	ri.setKav(new_kav);
 	Writer writer(*k_);
@@ -470,9 +446,6 @@ void StringWThread::launchStringThread(vector<Answer> *results, AnswerContainer 
 static vector<Answer> get_wisdom_answers_from_answer_container(vector<AnswerContainer> &final_answers, Knowledge *k, int max_size)
 {
 	clock_t start;
-	if (debug || measure_time) {
-		start = clock();
-	}
 
 	Writer writer(*k);	
 	int max_threads = 1;
@@ -496,10 +469,6 @@ static vector<Answer> get_wisdom_answers_from_answer_container(vector<AnswerCont
 	for(int n = 0; n < results.size(); ++n) {
 		vector<Answer> answers_tmp= results.at(n);
 		wisdom_answers.insert(wisdom_answers.end(), answers_tmp.begin(), answers_tmp.end() );
-	}
-	if (debug || measure_time) {
-		clock_t end = clock();
-		cout << "Mtime_wisdom_answers::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
 	}
 
 	return wisdom_answers;
@@ -597,10 +566,6 @@ static bool question_intersection(const QuestionList &lhs, const QuestionList &r
 
 	for(int lnum= 0; lnum < lpreds.size(); ++lnum) {
 		for(int rnum= 0; rnum < rpreds.size(); ++rnum) {
-			if ( debug ) {
-				puts("REPL_INTERS0:::");
-				cout << lpreds.at(lnum) << " " << rpreds.at(rnum) << endl;
-			}
 			if (lpreds.at(lnum) == rpreds.at(rnum)) {
 				continue;
 			}
@@ -611,11 +576,6 @@ static bool question_intersection(const QuestionList &lhs, const QuestionList &r
 
 			vector<DrtPred> lpreds= k->getPredsFromRef(lfref);
 			vector<DrtPred> rpreds= k->getPredsFromRef(rfref);
-			if ( debug ) {
-				puts("REPL_INTERS:::");
-				print_vector(lpreds);
-				print_vector(rpreds);
-			}
 			bool have_common_name = false;
 			for(int ri=0; ri < rpreds.size(); ++ri) {
 				string rstring= extract_header(rpreds.at(ri));
@@ -664,10 +624,6 @@ static bool word_intersection(const DrtVect &lpreds, const DrtVect &rpreds, Know
 			if(!lpreds.at(lnum).is_intersection() && !rpreds.at(rnum).is_intersection() )
 				continue;
 
-			if ( debug ) {
-				puts("REPL_INTERS2:::");
-				cout << lpreds.at(lnum) << " " << rpreds.at(rnum) << endl;
-			}
 			if (lpreds.at(lnum) == rpreds.at(rnum)) {
 				return true;
 			}
@@ -677,11 +633,6 @@ static bool word_intersection(const DrtVect &lpreds, const DrtVect &rpreds, Know
 
 			vector<string> lstrings= k->getNamesFromRef(lfref);
 			vector<string> rstrings= k->getNamesFromRef(rfref);
-			if ( debug ) {
-				puts("REPL_INTERS3:::");
-				print_vector(lstrings);
-				print_vector(rstrings);
-			}
 			bool have_common_name = false;
 			for(int ri=0; ri < rstrings.size(); ++ri) {
 				if (shortfind(lstrings,rstrings.at(ri))) {
@@ -728,9 +679,6 @@ static vector<AnswerContainer> get_answer_intersection(const vector<AnswerContai
 		}
 	}
 
-	if(debug) {
-		cout << "REF_INTERSECTION::: "<< to_return.size() << endl;
-	}
 
 	if (to_return.size())
 		return to_return;
@@ -763,9 +711,6 @@ static vector<AnswerContainer> get_answer_intersection(const vector<AnswerContai
 			}
 		}
 	} else {
-		if(debug) {
-			cout << "NO_WORD_INTERSECTION"<< endl;
-		}
 		for (int li = 0; li < lhs.size(); ++li) {
 			for (int ri = 0; ri < rhs.size(); ++ri) {
 				DrtVect dl = lhs.at(li).at(0).getPreds();
@@ -806,9 +751,6 @@ static vector<Answer> transform_kav_into_wisdom_answers(vector<KnowledgeAnswer> 
 		vector<pair<string, string> > str_answers;
 
 		clock_t start;
-		if (debug || measure_time ) {
-			start = clock();
-		}
 		for (int m = 0; m < qlist.size(); ++m) {
 			string qstr = writer.write(qlist.at(m), priors );
 			string str_answer = extract_header(qlist.at(m));
@@ -819,10 +761,6 @@ static vector<Answer> transform_kav_into_wisdom_answers(vector<KnowledgeAnswer> 
 				str_answer = "what";
 
 			str_answers.push_back(make_pair(str_answer, qstr));
-		}
-		if (debug || measure_time) {
-			clock_t end = clock();
-			cout << "Mtime_transform_kav_into_wisdom::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
 		}
 
 		// Put the answers in the return structure
@@ -1008,9 +946,6 @@ vector<KnowledgeAnswer> Arbiter::arbiterStep(drt question, StepInfo &sinfo)
 
 	int max_level = min(standard_max_level,wi_->getAccuracyLevel());
 
-	if(debug) {
-		cout << "MAX_LEVEL:::" << max_level << endl;
-	}
 
 	int approx_level = 5;
 	if (yn_question)
@@ -1038,18 +973,9 @@ vector<KnowledgeAnswer> Arbiter::arbiterStep(drt question, StepInfo &sinfo)
 		question = answer_pair.first;
 		mgu = answer_pair.second;
 
-		if (debug) {
-			cout << "QUESTION::: " << n << endl;
-			DrtVect tmppreds = question.predicates_with_references();
-			print_vector(tmppreds);
-			cout << mgu << endl;
-		}
 
 		// Finds the answers by searching in the knowledge
 		clock_t start;
-		if(debug || measure_time) {
-			start = clock();
-		}
 
 		vector<KnowledgeAnswer> tmp_answers;
 		if(n == 0) {
@@ -1061,17 +987,9 @@ vector<KnowledgeAnswer> Arbiter::arbiterStep(drt question, StepInfo &sinfo)
 			tmp_answers = k_->getAnswers(question);
 		}
 
-		if (debug || measure_time ) {
-			clock_t end = clock();
-			cout << "Mtime_arbiter_knowledge::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-		}
 
 		to_return.insert(to_return.end(), tmp_answers.begin(), tmp_answers.end());
 
-		if(debug) {
-			cout << "STIMEOUT2::: " << wi_->getTimeout() << endl;
-			cout << "TORETURNSIZE::: " << to_return.size() << endl;
-		}
 
 
 		// Finds the answers by using the solver
@@ -1082,9 +1000,6 @@ vector<KnowledgeAnswer> Arbiter::arbiterStep(drt question, StepInfo &sinfo)
 			if (to_return.size() == 0 // Questions already answered by the Knowledge are not solved
 			    || wi_->getDoSolver() // do the solver anyway
 			) {
-				if(debug || measure_time) {
-					start = clock();
-				}
 				drt dquest = question;
 
 				dquest = clean_cause(dquest);
@@ -1098,10 +1013,6 @@ vector<KnowledgeAnswer> Arbiter::arbiterStep(drt question, StepInfo &sinfo)
 					double w = mem.get_total_weigth();
 					vector<vector<clause_vector> > clause_history = mem.get_clause_history();
 					to_return.insert(to_return.end(), solved.begin(), solved.end());
-				}
-				if (debug || measure_time ) {
-					clock_t end = clock();
-					cout << "Mtime_arbiter_solver_knowledge::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
 				}
 			}
 		}
@@ -1131,9 +1042,6 @@ vector<KnowledgeAnswer> Arbiter::arbiterStep(drt question, StepInfo &sinfo)
 				vector<KnowledgeAnswer> tmp_answers = k_->getAnswers(presupp_questions.at(qnum));
 				presupp_answers.push_back(tmp_answers);
 			}
-			if(debug) {
-				cout << "PTIMEOUT::: " << wi_->getTimeout() << endl;
-			}
 
 			for (int q = 0; q < presupp_answers.size(); ++q)
 				to_return.insert(to_return.end(), presupp_answers.at(q).begin(), presupp_answers.at(q).end());
@@ -1162,9 +1070,6 @@ static drt specialize_question(drt question, const vector<KnowledgeAnswer> &answ
 			string second= mgu.at(m).second;
 
 			vector<string> names= k->getNamesFromRef(second);
-			if(debug) {
-				print_vector(names);
-			}
 			// assemble the names into a single string like name1|name2|name3...
 			string new_name;
 			for(int j=0; j < names.size(); ++j) {
@@ -1204,9 +1109,6 @@ ArbiterAnswer Arbiter::processAllQuestions(vector<drt> questions)
 	vector<StepInfo> ainfo(questions.size());
 	for (int qnum = 0; qnum < questions.size(); ++qnum) {
 		answers.at(qnum) = this->arbiterStep(questions.at(qnum), ainfo.at(0));
-		if(debug) {
-			cout << "KANSWER_NUM::: " << qnum << " " << answers.at(qnum).size() << endl;
-		}
 
 		if(qnum < questions.size()-1)
 			questions.at(qnum+1) = specialize_question(questions.at(qnum+1),answers.at(qnum), k_ );
@@ -1237,10 +1139,6 @@ ArbiterAnswer Arbiter::processAllQuestions(vector<drt> questions)
 	pre_wisdom_unique(wisdom_answers);
 	sort(wisdom_answers.begin(), wisdom_answers.end(), compare_answers);
 
-	if(debug) {
-		cout << "FA_SIZE:::" << final_answers.size() << endl;
-		cout << "WA_SIZE:::" << wisdom_answers.size() << endl;
-	}
 
 	// Fill the answer structure
 	ArbiterAnswer ra;
@@ -1248,28 +1146,12 @@ ArbiterAnswer Arbiter::processAllQuestions(vector<drt> questions)
 	ra.setComment(ri.getComment());
 	vector<KnowledgeAnswer> new_kav = ri.getKav();
 
-	if (debug) {
-		for (int n = 0; n < new_kav.size(); ++n) {
-			cout << "NEW_KAV::: " << new_kav.at(n).getText() << endl;
-		}
-	}
 
-	if(debug) {
-		cout << "KA_SIZE:::" << new_kav.size() << endl;
-	}
 
 	vector<Answer> new_w_answers = transform_kav_into_wisdom_answers(new_kav, k_);
 	wisdom_answers.insert(wisdom_answers.end(), new_w_answers.begin(), new_w_answers.end());
 
-	if (debug) {
-		for (int n = 0; n < wisdom_answers.size(); ++n) {
-			cout << "NEW_KAV2::: " << wisdom_answers.at(n).getWeigth() << endl;
-		}
-	}
 
-	if(debug) {
-		cout << "WA_SIZE2:::" << new_w_answers.size() << endl;
-	}
 
 	wisdom_unique(wisdom_answers);
 	ra.setAnswer(wisdom_answers);
@@ -1295,9 +1177,6 @@ ArbiterAnswer Arbiter::processQuestion(const pair<vector<drt>, vector<DrtPred> >
 	vector<StepInfo> ainfo(questions.size());
 	for (int qnum = 0; qnum < questions.size(); ++qnum) {
 		answers.at(qnum) = this->arbiterStep(questions.at(qnum), ainfo.at(0));
-		if(debug) {
-			cout << "KANSWER_NUM::: " << qnum << " " << answers.at(qnum).size() << endl;
-		}
 
 		if(qnum < questions.size()-1)
 			questions.at(qnum+1) = specialize_question(questions.at(qnum+1),answers.at(qnum), k_ );
@@ -1345,10 +1224,6 @@ ArbiterAnswer Arbiter::processQuestion(const pair<vector<drt>, vector<DrtPred> >
 	pre_wisdom_unique(wisdom_answers);
 	sort(wisdom_answers.begin(), wisdom_answers.end(), compare_answers);
 
-	if(debug) {
-		cout << "FA_SIZE:::" << final_answers.size() << endl;
-		cout << "WA_SIZE:::" << wisdom_answers.size() << endl;
-	}
 
 	// Fill the answer structure
 	ArbiterAnswer ra;
@@ -1356,28 +1231,12 @@ ArbiterAnswer Arbiter::processQuestion(const pair<vector<drt>, vector<DrtPred> >
 	ra.setComment(ri.getComment());
 	vector<KnowledgeAnswer> new_kav = ri.getKav();
 
-	if (debug) {
-		for (int n = 0; n < new_kav.size(); ++n) {
-			cout << "NEW_KAV::: " << new_kav.at(n).getText() << endl;
-		}
-	}
 
-	if(debug) {
-		cout << "KA_SIZE:::" << new_kav.size() << endl;
-	}
 
 	vector<Answer> new_w_answers = transform_kav_into_wisdom_answers(new_kav, k_);
 	wisdom_answers.insert(wisdom_answers.end(), new_w_answers.begin(), new_w_answers.end());
 
-	if (debug) {
-		for (int n = 0; n < wisdom_answers.size(); ++n) {
-			cout << "NEW_KAV2::: " << wisdom_answers.at(n).getWeigth() << endl;
-		}
-	}
 
-	if(debug) {
-		cout << "WA_SIZE2:::" << new_w_answers.size() << endl;
-	}
 
 	wisdom_unique(wisdom_answers);
 	ra.setAnswer(wisdom_answers);
@@ -1449,9 +1308,6 @@ ArbiterAnswer Arbiter::processWikidataQuestion(const vector<QuestionVersions> &q
 	wi_->startTime();
 	double max_time = wi_->getTimeout();
 
-	if(debug) {
-		cout << "QI::: " << endl;
-	}
 
 	ArbiterAnswer ra;
 	for(int candidate_num=0; candidate_num < qvect.size()
@@ -1541,10 +1397,6 @@ ArbiterAnswer Arbiter::processWikidataQuestion(const pair<vector<drt>, vector<Dr
 	pre_wisdom_unique(wisdom_answers);
 	sort(wisdom_answers.begin(), wisdom_answers.end(), compare_answers);
 
-	if(debug) {
-		cout << "FA_SIZE:::" << final_answers.size() << endl;
-		cout << "WA_SIZE:::" << wisdom_answers.size() << endl;
-	}
 
 	// Fill the answer structure
 	ArbiterAnswer ra;
@@ -1552,28 +1404,12 @@ ArbiterAnswer Arbiter::processWikidataQuestion(const pair<vector<drt>, vector<Dr
 	ra.setComment(ri.getComment());
 	vector<KnowledgeAnswer> new_kav = ri.getKav();
 
-	if (debug) {
-		for (int n = 0; n < new_kav.size(); ++n) {
-			cout << "NEW_KAV::: " << new_kav.at(n).getText() << endl;
-		}
-	}
 
-	if(debug) {
-		cout << "KA_SIZE:::" << new_kav.size() << endl;
-	}
 
 	vector<Answer> new_w_answers = transform_kav_into_wisdom_answers(new_kav, k_);
 	wisdom_answers.insert(wisdom_answers.end(), new_w_answers.begin(), new_w_answers.end());
 
-	if (debug) {
-		for (int n = 0; n < wisdom_answers.size(); ++n) {
-			cout << "NEW_KAV2::: " << wisdom_answers.at(n).getWeigth() << endl;
-		}
-	}
 
-	if(debug) {
-		cout << "WA_SIZE2:::" << new_w_answers.size() << endl;
-	}
 
 	wisdom_unique(wisdom_answers);
 	ra.setAnswer(wisdom_answers);
@@ -1604,9 +1440,6 @@ static DrtVect get_wikidata_question_from_single_drt(DrtVect drtvect)
 	WikidataInfo *wdi = WikidataSingleton::instance();
 
 	rules = wdi->getRules();
-	if(debug) {
-		cout << "RULES_SIZE::: " << rules.size() << endl;
-	}
 
 	Knowledge k;
 	Match match(&k);
@@ -1614,10 +1447,6 @@ static DrtVect get_wikidata_question_from_single_drt(DrtVect drtvect)
 		drtvect = match.substituteAllWithRule(drtvect,rules.at(n) );
 	}
 
-	if(debug) {
-		cout << "PRE_WIKIDATA:::";
-		print_vector(drtvect);
-	}
 	return drtvect;
 }
 
@@ -1697,23 +1526,14 @@ static string get_wikidata_string_from_drt(DrtVect drtvect, Options *options)
 			string wikidata_rule;
 
 			vector<string> forbidden = forbidden_map[cheader];
-			if(debug) {
-				cout << "FORBIDDEN:::" << forbidden.size() << endl;
-			}
 
 			bool proceed= true;
 			for(int m=0; m < forbidden.size(); ++m) {
 				if(shortfind(prev_properties,forbidden.at(m)) ) {
-					if(debug) {
-						cout << "FORB::: " << forbidden.at(m) << endl;
-					}
 					proceed = false;
 				}
 			}
 
-			if(debug) {
-				cout << "CHEADER:::" << cheader << endl;
-			}
 			if(!proceed)
 				continue;
 			if(cheader == "166")
@@ -1744,16 +1564,10 @@ static string get_wikidata_string_from_drt(DrtVect drtvect, Options *options)
 			map<string,string>::iterator miter =types.find(cheader);
 			if(miter != types.end() ) {
 				string type = miter->second;
-				if(debug) {
-					cout << "TYPES0::: " << type << endl;
-				}
 				if(type == "time") {
 					type_is_time = true;
 					prop_str = cheader;
 					options->type_ = type;
-					if(debug) {
-						cout << "TYPES::: " << type << " "<< prop_str << endl;
-					}
 				}
 			}
 
@@ -1785,15 +1599,9 @@ static string get_wikidata_string_from_drt(DrtVect drtvect, Options *options)
 
 	if(type_is_time) {
 		query_str+="&props="+prop_str;
-		if(debug) {
-			cout << "TYPES2::: " << " "<< query_str << endl;
-		}
 		options->props_ = prop_str;
 	}
 
-	if(debug) {
-		cout << "WRULES::: " << query_str << endl;
-	}
 
 
 	return query_str;
@@ -1819,15 +1627,9 @@ string convert_time_from_nlulite_to_wiki(const string &wdate)
 	date = wdate.substr(wdate.find("+")+1,wdate.find("T")-1);
 	vector<string> strs;
 	boost::split(strs,date,boost::is_any_of("-"));
-	if(debug) {
-		cout << "DATE::: "<< strs.at(2) << " " <<  strs.at(1) << " " << strs.at(0) << endl;
-	}
 	int year  = boost::lexical_cast<int>(strs.at(0));
 	int month = boost::lexical_cast<int>(strs.at(1));
 	int day   = boost::lexical_cast<int>(strs.at(2));
-	if(debug) {
-		cout << "DATE1::: "<< year << " " <<  month << " " << day << endl;
-	}
 
 	string month_str = months.at(month);
 
@@ -1836,9 +1638,6 @@ string convert_time_from_nlulite_to_wiki(const string &wdate)
 	to_return += "_"+month_str;
 	to_return += "_"+boost::lexical_cast<string>(year);
 
-	if(debug) {
-		cout << "DATE2::: " << to_return << endl;
-	}
 
 	return to_return;
 }
@@ -1904,10 +1703,6 @@ static vector<string> post_to_wikidata(string wikidata_query, Options options)
 			//&& header != "\r" // NO! The last line must be the return data
 		) {
 			headers.push_back(header);
-			if(debug) {
-				if(debug)
-					std::cout << "REPLY20::: " << header << std::endl;
-			}
 		}
 
 		if(debug)
@@ -1947,10 +1742,6 @@ static vector<string> post_to_wikidata(string wikidata_query, Options options)
 			std::cout << "REPLY4::: " << e.what() << std::endl;
 	}
 
-	if (debug || measure_time ) {
-		clock_t end = clock();
-		cout << "Mtime_wikidata::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 
 	return to_return;
 }
@@ -2097,11 +1888,6 @@ vector<DrtVect> get_all_word_combinations(const DrtVect &question)
 	}
 	to_return= tmp_solutions;
 
-	if(debug && to_return.size() ) {
-		cout << "COMBINATIONS:: ";
-		for(int n=0; n < to_return.size(); ++n)
-			print_vector(to_return.at(n));
-	}
 
 	return to_return;
 }
@@ -2126,9 +1912,6 @@ vector<KnowledgeAnswer> Arbiter::arbiterWikidataStep(drt question, StepInfo &sin
 	DrtVect drt_question = question.predicates_with_references();
 
 	clock_t start;
-	if(debug || measure_time) {
-		start = clock();
-	}
 
 	vector<string> q_answer;
 	Options options;
@@ -2143,10 +1926,6 @@ vector<KnowledgeAnswer> Arbiter::arbiterWikidataStep(drt question, StepInfo &sin
 			break;
 
 
-		if(debug) {
-			puts("NEW_DRS:::");
-			print_vector(questions.at(n));
-		}
 		drt_question                = get_wikidata_question_from_single_drt(questions.at(n));
 		string wikidata_query       = get_wikidata_string_from_drt(drt_question,&options);
 		if(shortfind(already_asked,wikidata_query))
@@ -2159,17 +1938,10 @@ vector<KnowledgeAnswer> Arbiter::arbiterWikidataStep(drt question, StepInfo &sin
 			break; // it just makes it faster
 	}
 
-	if (debug || measure_time ) {
-		clock_t end = clock();
-		cout << "Mtime_wikidata2::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 
 	for(int n=0; n < q_answer.size(); ++n) {
 		KnowledgeAnswer ka= create_kanswer_from_wikianswer(q_answer.at(n),question);
 		to_return.push_back(ka);
-		if(debug) {
-			cout << "REPLY5::: " << q_answer.at(n) << endl;
-		}
 	}
 
 	return to_return;

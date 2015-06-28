@@ -526,10 +526,6 @@ void tagger::step(vector<bool> &mask)
 				&& info->get_freq(words.at(i), "CC", word_tags.at(i)) == 0) {
 			if (activate_context) {
 				double w = context_->evaluateProperName(words.at(i)); // the same word is used before as NNP
-				if (debug) {
-					puts("proper_name:::");
-					cout << w << endl;
-				}
 				string tag = word_tags.at(i + 1);
 				if (w > 0.5 //&& (tag == "NN" || tag == "JJ")
 						) {
@@ -608,21 +604,12 @@ void tagger::step(vector<bool> &mask)
 				if (candidate_tag == word_tags.at(i + 1))
 					continue; // the new tag must be new
 				new_tags.at(i + 1) = candidate_tag;
-				if (debug) {
-					cout << "-TAG:: " << candidate_tag << std::flush << endl;
-				}
 				prob_after = info->get_freq(words.at(i), new_tags.at(i + 1), word_tags.at(i));
 				prob_after0 = prob_after;
-			}
-			if (debug) {
-				cout << "-TAG2:: " << words.at(i) << " " << candidate_tag << std::flush << endl;
 			}
 			prob_after += info->get_freq_back(words.at(i), new_tags.at(i + 1), word_tags.at(i + 2));
 			if (i > 0)
 				prob_after += info->get_freq_prior(words.at(i), new_tags.at(i + 1), word_tags.at(i - 1));
-			if (debug) {
-				cout << "-TAG3:: " << prob_after << " " << prob_before << std::flush << endl;
-			}
 			double prob_after_new = 0, prob_after_old = -1;
 			vector<string> new_tags_new;
 			for (int n = 0; (prob_before == 0 && prob_after0 == 0) && n < tags.size() /// this number is  arbitrary
@@ -641,10 +628,6 @@ void tagger::step(vector<bool> &mask)
 				prob_after_new += info->get_freq_back(words.at(i), new_tags_new.at(i + 1), word_tags.at(i + 2));
 				if (i > 0)
 					prob_after_new += info->get_freq_prior(words.at(i), new_tags_new.at(i + 1), word_tags.at(i - 1));
-				if (debug) {
-					cout << "TAG2:: " << words.at(i) << " " << candidate_tag << ", " << prob_after_new << " BEFORE: "
-							<< word_tags.at(i + 1) << " " << prob_before << " 0: " << prob_after0 << std::flush << endl;
-				}
 				if (prob_after_new > prob_after_old) {
 					prob_after_old = prob_after_new;
 					new_tags = new_tags_new;
@@ -800,11 +783,6 @@ vector<vector<string> > tagger::measure()
 	for (incr = 0; incr < size; ++incr) {
 		step(mask);
 //          cout << incr << " ";
-		if (debug) {
-			print_vector(words);
-			print_vector(words_orig);
-			print_vector(word_tags);
-		}
 		old_tags = word_tags;
 
 	}
@@ -936,10 +914,6 @@ vector<string> tagger::guess_missing_tags(vector<string> tagged)
 	vector<string>::iterator words_iter;
 	string word, base, tag;
 
-	if (debug) {
-		puts("GUESSING0:::");
-		print_vector(tagged);
-	}
 
 	words_iter = words.begin();
 	tagged_iter = tagged.begin() + 1;
@@ -969,9 +943,6 @@ vector<string> tagger::guess_missing_tags(vector<string> tagged)
 				// The item is tagged wrong because is not in the freq.txt file.
 				// Therefore, save the iterators to the word and tag to process
 				iter_pairs.push_back(make_pair(words_iter, tagged_iter));
-				if (debug) {
-					cout << "GUESS_M::: " << m << endl;
-				}
 			}
 		}
 		++tagged_iter;
@@ -1026,10 +997,6 @@ vector<string> tagger::guess_missing_tags(vector<string> tagged)
 		already_done.push_back(substitutions.at(n).first);
 	}
 
-	if (debug) {
-		puts("GUESSING:::");
-		print_vector(tagged);
-	}
 
 	// check that verbs are tagged as verbs, and nouns as nouns
 	words_iter = words.begin();
@@ -1106,10 +1073,6 @@ vector<string> tagger::guess_missing_tags(vector<string> tagged)
 		++tagged_iter;
 	}
 
-	if (debug) {
-		puts("GUESSING2:::");
-		print_vector(tagged);
-	}
 
 	return tagged;
 }
@@ -1201,9 +1164,6 @@ string order_qs(string qs)
 	sort(strs.begin(),strs.end(),compare_qs);
 	strs.erase(std::unique(strs.begin(), strs.end()), strs.end());
 	for(int n=0; n < strs.size(); ++n) {
-		if(debug) {
-			cout << "STRS::: " << strs.at(n) << endl;
-		}
 		to_return += strs.at(n);
 		if(n != strs.size()-1)
 			to_return += "|";
@@ -1258,9 +1218,6 @@ vector<string> tagger::substitute_wikidata_qs(vector<string> tagged)
 				q_add_str += (string)"Q" + boost::lexical_cast<string>(q);
 				if(qn != qs.size()-1)
 					q_add_str += "|";
-			}
-			if(debug) {
-				cout << "WIBEGIN::: " << *words_iter_begin << endl;
 			}
 			if(*words_iter_begin == "the" && distance(words_iter_begin,words_iter_end) != 1) {
 				name        = join_wikidata_words(words_iter_begin+1, words_iter_end);
@@ -1365,9 +1322,6 @@ bool tagger::isHiddenQuestion(const vector<string> &tagged, const vector<string>
 	string tag = tagged.at(1);
 	string word = words.at(0);
 
-	if (debug) {
-		cout << "HIDDEN::: " << tag << "," << word << endl;
-	}
 
 	if (tag == "MD")
 		return true;

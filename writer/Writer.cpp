@@ -208,9 +208,6 @@ static bool compare_pred_names(const DrtPred &plhs, const DrtPred &prhs)
 		vector<string>::iterator right = find(WPs.begin(), WPs.end(), rhs);
 		int ldist = std::distance(WPs.begin(), left);
 		int rdist = std::distance(WPs.begin(), right);
-		if (debug) {
-			cout << "DIST::: " << ldist << ", " << rdist << endl;
-		}
 		return ldist < rdist;
 	}
 
@@ -296,9 +293,6 @@ bool ComparePredNames::operator()(const DrtPred &plhs, const DrtPred &prhs)
 		vector<string>::iterator right = find(WPs.begin(), WPs.end(), rhs);
 		int ldist = std::distance(WPs.begin(), left);
 		int rdist = std::distance(WPs.begin(), right);
-		if (debug) {
-			cout << "DIST::: " << ldist << ", " << rdist << endl;
-		}
 		return ldist < rdist;
 	}
 
@@ -575,21 +569,12 @@ vector<DrtPred> select_answer_to_question(const vector<DrtPred> &preds, const Dr
 			double hypernym_w_metal= d->hypernym_dist(header, "metal", 9);
 			hypernym_w= max(hypernym_w,hypernym_w_metal);
 		}
-		if(debug) {
-			cout << "SELECT:: " << header << " " << question_str << " " << pertayn_w << " " << hypernym_w << endl;
-		}
 		string tag = preds.at(n).tag();
 		if(header != question_str && header != "[number]" && tag != "PRP" && pertayn_w > hypernym_w && pertayn_w > w) {
-			if(debug) {
-				cout << "PERT:: " << header << endl;
-			}
 			w= pertayn_w;
 			first_pred_pos= n;
 		}
 		if(header != question_str && header != "[number]" && tag != "PRP" && hypernym_w > pertayn_w && hypernym_w > w) {
-			if(debug) {
-				cout << "HYPER:: " << header << endl;
-			}
 			w= hypernym_w;
 			first_pred_pos=n;
 		}
@@ -730,9 +715,6 @@ pair<string, DrtPred> Writer::getStringFromPred(DrtPred pred, vector<DrtPred> sp
 
 	string head = extract_header(pred);
 
-	if(debug) {
-		cout << "HEAD::: " << head << endl;
-	}
 
 	string ret_str = "";
 	DrtPred pred_str(pred);
@@ -741,19 +723,8 @@ pair<string, DrtPred> Writer::getStringFromPred(DrtPred pred, vector<DrtPred> sp
 		string ref_str = extract_first_tag(pred);
 
 		clock_t start;
-		if (debug) {
-			start = clock();
-		}
 		vector<DrtPred> pred_names, pred_rulenames;
 		pred_names = k_.getPredsFromRef(ref_str);
-		if (debug) {
-			puts("PRED_NAMES0::: ");
-			print_vector(pred_names);
-		}
-		if (debug) {
-			clock_t end = clock();
-			cout << "Mtime_writer4::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-		}
 
 		int key = get_key_from_header( extract_header(pred) );
 		if(key != -1) {
@@ -762,16 +733,10 @@ pair<string, DrtPred> Writer::getStringFromPred(DrtPred pred, vector<DrtPred> sp
 				implant_header(pred,new_header);
 		}
 		string tmp_header= extract_header(pred);
-		if(debug) {
-			cout << "QDATE0::: " << tmp_header << endl;
-		}
 		if(tmp_header.find(":Q[") != string::npos) {
 			int pos = tmp_header.find(":Q");
 			string str= tmp_header.substr(pos+2,tmp_header.size());
 			implant_header(pred,str);
-			if(debug) {
-				cout << "QDATE::: " << str << endl;
-			}
 		}
 
 		pred_names.push_back(pred);
@@ -789,10 +754,6 @@ pair<string, DrtPred> Writer::getStringFromPred(DrtPred pred, vector<DrtPred> sp
 				ComparePredNames compare(*priors, "");
 				sort(pred_names.begin(), pred_names.end(), compare);
 			}
-			if (debug) {
-				puts("PRED_NAMES::: ");
-				print_vector(pred_names);
-			}
 			string word = "";
 			DrtPred pred_name;
 			// take the first name that is not ""
@@ -809,9 +770,6 @@ pair<string, DrtPred> Writer::getStringFromPred(DrtPred pred, vector<DrtPred> sp
 					word = extract_header(pred_name);
 					break;
 				}
-			}
-			if (debug) {
-				cout << "COUNTRY:::" << word << endl;
 			}
 			if (!pred_name.is_adjective() && d->is_country(word))
 				pred_name.setTag("NNP");
@@ -871,18 +829,12 @@ pair<string, DrtPred> Writer::getStringFromPred(DrtPred pred, vector<DrtPred> sp
 		vector<string> verb_names = k_.getVerbNamesFromRef(ref_str);
 
 		//Rules rs = k_.getRulesPersonae();
-		if(debug) {
-			cout << "CONJ-1::: " << ret_str << " " << pred << endl;
-		}
 
 		verb_names.push_back(extract_header(pred));
 		string RP_str = "";
 		if (verb_names.size()) {
 			ret_str = verb_names.at(0);
 			ret_str= avoid_embarassing_verb_names(pred,ret_str,&verb_tag);
-			if(debug) {
-				cout << "CONJ0::: " << ret_str << " " << verb_names.at(0) << " " << verb_tag << endl;
-			}
 			if (ret_str.find("_") != string::npos) {
 				vector<string> strs;
 				boost::split(strs, ret_str, boost::is_any_of("_"));
@@ -906,9 +858,6 @@ pair<string, DrtPred> Writer::getStringFromPred(DrtPred pred, vector<DrtPred> sp
 				if (conjugate) {
 					ret_str = info->conjugate(ret_str, verb_tag);
 
-					if(debug) {
-						cout << "CONJ::: " << ret_str << " " << verb_names.at(0) << " " << verb_tag << endl;
-					}
 					if (ret_str == "haven")
 						ret_str = "have";
 					if (ret_str == "don")
@@ -1413,10 +1362,6 @@ SentenceTree Writer::getSentenceTree(vector<DrtPred> speech)
 {
 	SentenceTree to_return;
 
-	if (debug) {
-		puts("SPEECH:::");
-		print_vector(speech);
-	}
 	speech = eliminateRedundant(speech); // if the same ref appears twice one of the two names is deleted
 
 	MatchWrite mgraph(speech);
@@ -1583,12 +1528,6 @@ DrtVect Writer::insertSpecifications(DrtVect speech)
 		vector<DrtVect> new_specs = k_.getSpecificationsFromRef(ref);
 		vector<DrtVect> specs = filter_valid_specifications(new_specs);
 
-		if (debug) {
-			puts("SPEECH_SPECS::");
-			cout << "SPECS_REF::: " << ref << endl;
-			for (int n=0; n < specs.size(); ++n)
-				print_vector(specs.at(n));
-		}
 
 		for (int n = 0; n < specs.size(); ++n) {
 			if (spec_is_already_present(speech, specs.at(n)))
@@ -1644,12 +1583,6 @@ DrtVect Writer::insertSpecificationsLocally(DrtVect speech, int pos)
 		vector<DrtVect> new_specs = k_.getSpecificationsFromRef(ref);
 		vector<DrtVect> specs = filter_valid_specifications(new_specs);
 
-		if (debug) {
-			puts("SPEECH_SPECS::");
-			cout << "SPECS_REF::: " << ref << endl;
-			for (int n=0; n < specs.size(); ++n)
-				print_vector(specs.at(n));
-		}
 
 		for (int n = 0; n < specs.size(); ++n) {
 			if (spec_is_already_present(speech, specs.at(n)))
@@ -1755,9 +1688,6 @@ static DrtVect implement_passive_form(DrtVect speech)
 				string next_ref= extract_first_tag(speech.at(m+1));
 				if(m == speech.size() -2)
 					next_ref = "";
-				if(debug) {
-					cout << "BE_REF::" << fref << " " << next_ref << endl;
-				}
 				if(fref == oref && next_ref != oref) {
 					DrtPred be_pred(new_verb);
 					implant_header(be_pred,"be");
@@ -1877,39 +1807,15 @@ string Writer::writeSingleSentence(DrtPred complement, vector<DrtPred> speech)
 	writer_sort(speech);
 	speech = implement_passive_form(speech);
 	speech = insertJoinedNouns(speech);
-	if (debug) {
-		puts("AFTER_SPECS::: ");
-		print_vector(speech);
-	}
 	speech = insertSpecifications(speech);
-	if (debug) {
-		puts("AFTER_SPECS2::: ");
-		print_vector(speech);
-	}
 	speech = insertAdverbs(speech);
-	if (debug) {
-		puts("BEFORE_REDUNDANT::: ");
-		print_vector(speech);
-	}
 	speech = eliminateRedundant(speech);
-	if (debug) {
-		puts("AFTER_REDUNDANT::: ");
-		print_vector(speech);
-	}
 	speech = eliminateCompeting(speech);
-	if (debug) {
-		puts("AFTER_COMPETING::: ");
-		print_vector(speech);
-	}
 	speech = addMissing(speech);
 	speech = collapse_dummy_complements(speech);
 	speech = eliminate_broken_complements(speech);
 	speech = assign_VBG(speech);
 
-	if (debug) {
-		puts("AFTER_MISSING::: ");
-		print_vector(speech);
-	}
 //speech= order_subordinate_elements(speech);
 
 	vector<DrtPred>::iterator diter = speech.begin();
@@ -1918,19 +1824,12 @@ string Writer::writeSingleSentence(DrtPred complement, vector<DrtPred> speech)
 	Priors priors(priors_);
 
 	clock_t start;
-	if (debug) {
-		start = clock();
-	}
 	int speech_pos = 0;
 	for (; diter != dend && speech_pos < speech.size(); ++diter, ++speech_pos) {
 		if (!is_valid_element(*diter))
 			continue;
 		DrtPred printed_pred;
 		pair<string,DrtPred> sp_pair = getStringFromPred(clean_references(*diter), speech, conjugate, &priors, &printed_pred);
-		if (debug) {
-			puts("WRITING::: ");
-			print_vector(speech);
-		}
 		str += sp_pair.first;
 		str += " ";
 		speech.at(speech_pos) = sp_pair.second;
@@ -1951,10 +1850,6 @@ string Writer::writeSingleSentence(DrtPred complement, vector<DrtPred> speech)
 		}
 	}
 
-	if (debug) {
-		clock_t end = clock();
-		cout << "Mtime_writer3::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 
 	return str;
 }
@@ -2271,10 +2166,6 @@ string Writer::write(const DrtPred &d, Priors priors)
 	priors_ = priors;
 	vector<DrtPred> drtvect;
 	drtvect.push_back( create_proper_predicate(d) );
-	if(debug) {
-		cout << "WRITING_Q::: " << endl;
-		print_vector(drtvect);
-	}
 	return this->write(drtvect, priors_);
 }
 
@@ -2361,12 +2252,6 @@ string Writer::write(const vector<KnowledgeAnswer> &kav, drt &dquest)
 
 	Engine engine(&k_);
 	CodePred result = engine.run(answer);
-	if (debug) {
-		cout << "KAV:::" << yn_question << endl;
-		stringstream ss;
-		engine >> ss;
-		cout << "KAV2:::" << ss.str() << endl;
-	}
 	DrtVect answer_drs = engine.getList<DrtPred>("answer");
 	comment = this->write(answer_drs);
 

@@ -169,9 +169,6 @@ bool DrtPred::unify(const DrtPred &rhs, DrtMgu *mgu) const
 	if (debug)
 		start = clock();
 
-	if (debug) {
-		cout << "UNIFY::: " << *this << " " << rhs << " " << children_.size() << " " << rhs.children_.size() << endl;
-	}
 
 	if (children_.size() != rhs.children_.size())
 		return false;
@@ -192,11 +189,6 @@ bool DrtPred::unify(const DrtPred &rhs, DrtMgu *mgu) const
 		}
 	}
 
-	if (debug) {
-		clock_t end = clock();
-		all_time += (end - start);
-		cout << "Mtime12::: " << all_time / (double) CLOCKS_PER_SEC << endl;
-	}
 
 	return true;
 }
@@ -709,10 +701,6 @@ vector<DrtPred> find_all_attached_to_verb(vector<DrtPred> preds, int m)
 {
 	vector<DrtPred> cons;
 
-	if (debug) {
-		cout << "ALL_PREDS::: ";
-		print_vector(preds);
-	}
 
 	if (!preds.at(m).is_verb())  // check the verb is a verb
 		return cons;
@@ -741,10 +729,6 @@ vector<DrtPred> find_all_attached_to_verb(vector<DrtPred> preds, int m)
 		}
 	}
 
-	if (debug) {
-		cout << "ALL_PREDS2::: ";
-		print_vector(preds);
-	}
 
 	string verb = extract_first_tag(verb_cons);
 
@@ -752,10 +736,6 @@ vector<DrtPred> find_all_attached_to_verb(vector<DrtPred> preds, int m)
 	vector<DrtVect> items;
 	items.push_back(connected_verb);
 
-	if (debug) {
-		puts("CONNECTED_VERB::: ");
-		print_vector(connected_verb);
-	}
 
 	vector<DrtPred> new_terms, new_terms2, new_terms3;
 	/// The next cycle erases the @conditions and @conjunctions and
@@ -770,28 +750,13 @@ vector<DrtPred> find_all_attached_to_verb(vector<DrtPred> preds, int m)
 				items.at(j - 1).erase(items.at(j - 1).begin() + n);
 				--n;
 			} else {
-				if (debug) {
-					cout << "PRED_ATTACHED::: " << items.at(j - 1).at(n) << endl;
-				}
 				if (items.at(j - 1).at(n).is_verb()) {
 					// if an element is a verb then adds the subj, obj, and specifications of the subj and obj
 					string subj = extract_subject(items.at(j - 1).at(n));
 					string obj = extract_object(items.at(j - 1).at(n));
-					if (debug) {
-						cout << "PRED_ATTACHED2::: " << subj << " " << obj << endl;
-					}
 
 					new_terms = get_predicates_from_position(preds, find_all_element_with_string(preds, subj));
 					new_terms2 = get_predicates_from_position(preds, find_all_element_with_string(preds, obj));
-					if (debug) {
-						cout << "ALL_PREDS3::: ";
-						print_vector(preds);
-					}
-					if (debug) {
-						cout << "PRED_ATTACHED3::: ";
-						print_vector(new_terms);
-						print_vector(new_terms2);
-					}
 
 					for (int m = 0; m < new_terms2.size();) {
 						if (find(new_terms.begin(), new_terms.end(), new_terms2.at(m)) != new_terms.end())
@@ -807,9 +772,6 @@ vector<DrtPred> find_all_attached_to_verb(vector<DrtPred> preds, int m)
 				} else {
 					// an element attached to a complement is added to the list
 					string second_tag = extract_second_tag(items.at(j - 1).at(n));
-					if (debug) {
-						cout << "SECOND_TAG::: " << second_tag << endl;
-					}
 					new_terms = get_predicates_from_position(preds, find_all_element_with_string(preds, second_tag));
 				}
 				for (int m = 0; m < new_terms.size();) {
@@ -1788,12 +1750,6 @@ vector<DrtVect> get_linked_drtvect_from_single_drtvect(const DrtVect &drtvect)
 		}
 	}
 
-	if (debug) {
-		std::cout << "CONNECTED:: " << std::endl;
-		for (int m = 0; m < to_return.size(); ++m) {
-			print_vector(to_return.at(m));
-		}
-	}
 
 	return to_return;
 }

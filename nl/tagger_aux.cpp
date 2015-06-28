@@ -270,10 +270,6 @@ void aux_post_process_original(vector<string> words, vector<string> tagged, tagg
 
 	metric *d = metric_singleton::get_metric_instance();
 
-	if (debug) {
-		puts("T-00");
-		print_vector(tagged);
-	}
 
 	// will/VB -> will/MD
 	words_iter = words.begin();
@@ -397,10 +393,6 @@ void aux_post_process_original(vector<string> words, vector<string> tagged, tagg
 		++words_iter;
 	}
 
-	if (debug) {
-		puts("T-000");
-		print_vector(tagged);
-	}
 
 	// correct JJ tagged as VBD or VBN
 	words_iter = words.begin();
@@ -470,10 +462,6 @@ void aux_post_process_original(vector<string> words, vector<string> tagged, tagg
 	}
 
 
-	if (debug) {
-		puts("T-0001");
-		print_vector(tagged);
-	}
 
 	// "then" before PRP(he) is RB
 	words_iter = words.begin();
@@ -540,9 +528,6 @@ void aux_post_process_original(vector<string> words, vector<string> tagged, tagg
 		string next_next_tag = *boost::next(boost::next(tagged_iter));
 		string next_next_word = *boost::next(boost::next(words_iter));
 
-		if (debug) {
-			cout << "JJR::: " << word << " " << next_word << " " << next_next_word << endl;
-		}
 
 		if ((word == "more" || word == "less") && next_next_word == "than" && d->is_adjective(next_word)) {
 			*tagged_iter = "JJR";
@@ -914,10 +899,6 @@ void aux_post_process_original(vector<string> words, vector<string> tagged, tagg
 		++words_iter;
 	}
 
-	if (debug) {
-		puts("T-1");
-		print_vector(tagged);
-	}
 
 	bool aux = false;
 	bool DT_trigger = false;
@@ -984,10 +965,6 @@ void aux_post_process_original(vector<string> words, vector<string> tagged, tagg
 		++words_iter;
 	}
 
-	if (debug) {
-		puts("T0");
-		print_vector(tagged);
-	}
 
 	aux = false;
 	words_iter = words.begin();
@@ -997,10 +974,6 @@ void aux_post_process_original(vector<string> words, vector<string> tagged, tagg
 		word = *words_iter;
 		tag = *tagged_iter;
 
-		if (debug) {
-			cout << "AUXING::: " << aux << "," << word << "," << CC_trigger << "," << is_question_ << endl;
-			print_vector(tagged);
-		}
 
 		/// artificially solve the tag VB that is tagged as VBP (after an AUX)
 		//cout << aux << ", " << std::boolalpha << ", "<< word<< "," << tag <<endl;
@@ -1205,10 +1178,6 @@ void aux_post_process_original(vector<string> words, vector<string> tagged, tagg
 		++words_iter;
 	}
 
-	if (debug) {
-		puts("T1");
-		print_vector(tagged);
-	}
 
 	// sometimes "found" is tagged as name
 	words_iter = words.begin();
@@ -1537,10 +1506,6 @@ void aux_post_process_original(vector<string> words, vector<string> tagged, tagg
 		++words_iter;
 	}
 
-	if (debug) {
-		cout << "AGO:: " << endl;
-		print_vector(tagged);
-	}
 	vector<string> chrono = info->getChronoNames();
 	words_iter = words.begin();
 	tagged_iter = tagged.begin() + 1;
@@ -1623,11 +1588,6 @@ void aux_post_process_original(vector<string> words, vector<string> tagged, tagg
 
 		++tagged_iter;
 		++words_iter;
-	}
-	if (debug) {
-		cout << "AGO1:: " << endl;
-		print_vector(tagged);
-		print_vector(words);
 	}
 
 	// IN(under) VBD(renewed) -> IN(under) VBN(renewed)
@@ -1905,10 +1865,6 @@ void aux_post_process_original(vector<string> words, vector<string> tagged, tagg
 		++words_iter;
 	}
 
-	if (debug) {
-		puts("T5:::");
-		print_vector(tagged);
-	}
 
 	// An NNS between two NNPs or NN becomes VBZ
 	words_iter = words.begin();
@@ -1979,10 +1935,6 @@ void aux_post_process_original(vector<string> words, vector<string> tagged, tagg
 		++words_iter;
 	}
 
-	if (debug) {
-		puts("T6:::");
-		print_vector(tagged);
-	}
 
 	// A VBN after "the" can become JJ
 	words_iter = words.begin();
@@ -2410,11 +2362,6 @@ void aux_post_process_original(vector<string> words, vector<string> tagged, tagg
 
 	// Adds "IN(that)" when is needed
 
-	if (debug) {
-		puts("THAT:::");
-		print_vector(tagged);
-		print_vector(words);
-	}
 
 	bool that_trigger = false, IN_trigger = false;
 	words_iter = words.begin();
@@ -2586,11 +2533,6 @@ void aux_post_process_original(vector<string> words, vector<string> tagged, tagg
 		++words_iter;
 	}
 
-	if (debug) {
-		puts("THAT2:::");
-		print_vector(tagged);
-		print_vector(words);
-	}
 
 	that_trigger = false, IN_trigger = false;
 	bool write_trigger = false;
@@ -2633,13 +2575,7 @@ void aux_post_process_original(vector<string> words, vector<string> tagged, tagg
 		if (that_trigger && tag == "WDT" && word == "that") {
 			that_trigger = false;
 		}
-		if (debug) {
-			cout << "WDT2::: " << tag << " " << word << " " << that_trigger << endl;
-		}
 		if (that_trigger && tag == "WDT" && word == "which") {
-			if (debug) {
-				cout << "WDT3::: " << tag << " " << word << endl;
-			}
 			that_trigger = false;
 		}
 
@@ -3277,11 +3213,6 @@ void aux_post_process_original(vector<string> words, vector<string> tagged, tagg
 
 // process passive with implicit that/WDT be/VBP (a referendum led by ...)
 
-	if (debug) {
-		puts("THAT_BE:::");
-		print_vector(tagged);
-		print_vector(words);
-	}
 
 	that_trigger = false;
 	IN_trigger = false;
@@ -3854,10 +3785,6 @@ void aux_post_process_original(vector<string> words, vector<string> tagged, tagg
 		++words_iter;
 	}
 
-	if (debug) {
-		puts("COUNTRY:::");
-		print_vector(tagged);
-	}
 
 // wimbledon, london was-> wimbledon_london was
 	words_iter = words.begin();
@@ -3892,10 +3819,6 @@ void aux_post_process_original(vector<string> words, vector<string> tagged, tagg
 
 		++tagged_iter;
 		++words_iter;
-	}
-	if (debug) {
-		puts("COUNTRY2:::");
-		print_vector(tagged);
 	}
 
 // Corrects POS tagged as NN
@@ -3956,10 +3879,6 @@ void aux_post_process_original(vector<string> words, vector<string> tagged, tagg
 		++words_iter;
 	}
 
-	if (debug) {
-		puts("NNS-VBZ:::");
-		print_vector(tagged);
-	}
 
 // A NNS after who/WP (or after a proper name) can become VBZ (not for question)
 	words_iter = words.begin();
@@ -3989,10 +3908,6 @@ void aux_post_process_original(vector<string> words, vector<string> tagged, tagg
 		++words_iter;
 	}
 
-	if (debug) {
-		puts("NNS-VBZ2:::");
-		print_vector(tagged);
-	}
 
 // the us/PRP -> the us/NNP
 	words_iter = words.begin();
@@ -4204,9 +4119,6 @@ void aux_post_process_original(vector<string> words, vector<string> tagged, tagg
 
 		string candidate_name = word + "_" + next_word;
 
-		if (debug) {
-			cout << "CITY::: " << candidate_name << " " << d->hypernym_dist(candidate_name, "city") << endl;
-		}
 
 		if (d->hypernym_dist(candidate_name, "country") > 0.4 || d->hypernym_dist(candidate_name, "city") > 0.4) {
 			*tagged_iter = "NNP";
@@ -4326,12 +4238,6 @@ void aux_post_process_original(vector<string> words, vector<string> tagged, tagg
 			++tagged_iter;
 			++words_iter;
 			continue;
-		}
-		if (debug) {
-			puts("JJ:::");
-			cout << word << endl;
-			vector<string> pvect = d->get_pertainyms(word);
-			print_vector(pvect);
 		}
 		if (aux_is_verb(tag) && d->is_adjective(word) && *boost::prior(tagged_iter) == "CC"
 				&& *boost::prior(boost::prior(tagged_iter)) == "JJ") {
@@ -4555,10 +4461,6 @@ void aux_post_process_original(vector<string> words, vector<string> tagged, tagg
 	}
 
 // gives/VB|VBP -> gives/VBZ
-	if (debug) {
-		puts("VBZ11:::");
-		print_vector(tagged);
-	}
 	words_iter = words.begin();
 	tagged_iter = tagged.begin() + 1;
 	while (boost::next(tagged_iter) != tagged.end()) {
@@ -4574,10 +4476,6 @@ void aux_post_process_original(vector<string> words, vector<string> tagged, tagg
 		++words_iter;
 	}
 // gives/VB|VBP -> gives/VBZ
-	if (debug) {
-		puts("VBZ10:::");
-		print_vector(tagged);
-	}
 	words_iter = words.begin();
 	tagged_iter = tagged.begin() + 1;
 	while (boost::next(tagged_iter) != tagged.end()) {
@@ -5092,10 +4990,6 @@ void aux_post_process_original(vector<string> words, vector<string> tagged, tagg
 		++words_iter;
 	}
 
-	if (debug) {
-		puts("VVV3:::");
-		print_vector(tagged);
-	}
 
 	// "like" before "all" and after empy space is IN
 	words_iter = words.begin();

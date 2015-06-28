@@ -249,10 +249,6 @@ static vector<DrtPred> only_pivots(const vector<DrtPred> &preds)
 
 static vector<DrtPred> drt_unique(vector<DrtPred> preds)
 {
-	if (debug) {
-		puts("DRT_UNIQUE:::");
-		print_vector(preds);
-	}
 
 	vector<DrtPred> already_parsed;
 	DrtVect to_return;
@@ -267,10 +263,6 @@ static vector<DrtPred> drt_unique(vector<DrtPred> preds)
 
 static bool is_valid_drt(vector<DrtPred> preds)
 {
-	if (debug) {
-		puts("DRT_VALID:::");
-		print_vector(preds);
-	}
 
 	DrtVect to_return;
 	for (int n = 0; n < preds.size(); ++n) {
@@ -659,11 +651,6 @@ void Sense::loadVerbCombined(const string &s)
 				print_vector_stream(ss, drtvect);
 				sense_weight_[ss.str()] = make_pair(w, num);
 
-				if (debug) {
-					puts("VERB_COMB:::");
-					cout << lemma << " " << ss.str() << endl;
-					print_vector(drtvect);
-				}
 
 			} catch (std::exception &e) {
 			}
@@ -784,10 +771,6 @@ static vector<pair<string, DrtVect> > find_candidate_verbs(const DrtVect &drtvec
 			DrtVect dvect = find_all_attached_to_verb(drtvect, n);
 			header = header.substr(0, header.find(":"));
 			candidate_verbs.push_back(make_pair(header, dvect));
-			if (debug) {
-				puts("CANDIDATE_VERB");
-				print_vector(dvect);
-			}
 		}
 	}
 	return candidate_verbs;
@@ -902,10 +885,6 @@ static vector<pair<string, DrtVect> > find_candidate_nouns(const DrtVect &drtvec
 			for (int j = 0; j < vdrt.size(); ++j) {
 				candidate_verbs.push_back(make_pair(header, vdrt.at(j)));
 				stringstream ss;
-				if (debug) {
-					print_vector_stream(ss, vdrt.at(j));
-					std::cerr << ss.str() << endl;
-				}
 			}
 		}
 	}
@@ -919,10 +898,6 @@ static vector<int> find_candidate_lexnames(const vector<string> &cverbs)
 	metric *d = metric_singleton::get_metric_instance();
 	for (int n = 0; n < cverbs.size(); ++n) {
 		vector<int> lex_tmp = d->verb_lexnames(cverbs.at(n));
-		if (debug) {
-			cout << "FIND_CANDIDATE_LEX:::" << cverbs.at(n) << endl;
-			print_vector(lex_tmp);
-		}
 		lexs.insert(lexs.end(), lex_tmp.begin(), lex_tmp.end());
 	}
 	return lexs;
@@ -986,25 +961,15 @@ vector<DrtVect> Sense::getCandidateCombined(const DrtVect &drtvect, const string
 			string header = extract_header(drtvect.at(n));
 			header = header.substr(0, header.find(":"));
 
-			if (debug) {
-				cout << "LEMMA_COMB:::" << header << ", " << lemma << endl;
-			}
 
 			if (header == lemma) {
 				extracted_drt = find_all_attached_to_verb(drtvect, n);
-				if (debug) {
-					puts("TRUE:::");
-					print_vector(extracted_drt);
-				}
 				has_drt = true;
 				break;
 			}
 		}
 	}
 
-	if (debug) {
-		cout << "LEMMA_COMBINED::: " << lemma << endl;
-	}
 
 	vector<DrtVect> to_return;
 	if (!has_drt)
@@ -1013,9 +978,6 @@ vector<DrtVect> Sense::getCandidateCombined(const DrtVect &drtvect, const string
 	bool levinize = true;
 	vector<string> keys = get_all_composed_lemmas(extracted_drt, levinize);
 	for (int n = 0; n < keys.size(); ++n) {
-		if (debug) {
-			cout << "LEMMA_COMBINED2::: " << keys.at(n) << endl;
-		}
 		MapStrDrt::iterator miter = sense_combined_.find(keys.at(n));
 		if (miter != sense_combined_.end()) {
 			to_return.insert(to_return.end(), miter->second.begin(), miter->second.end());
@@ -1040,9 +1002,6 @@ vector<DrtVect> Sense::getCandidateCombinedNegative(const DrtVect &drtvect, cons
 		}
 	}
 
-	if (debug) {
-		cout << "LEMMA_COMBINED_NEGATIVE::: " << lemma << endl;
-	}
 	vector<DrtVect> to_return;
 	if (!has_drt)
 		return to_return;
@@ -1050,9 +1009,6 @@ vector<DrtVect> Sense::getCandidateCombinedNegative(const DrtVect &drtvect, cons
 	bool levinize = true;
 	vector<string> keys = get_all_composed_lemmas(extracted_drt, levinize);
 	for (int n = 0; n < keys.size(); ++n) {
-		if (debug) {
-			cout << "LEMMA_NEGATIVE_COMBINED2::: " << keys.at(n) << endl;
-		}
 		MapStrDrt::iterator miter = sense_negative_combined_.find(keys.at(n));
 		if (miter != sense_negative_combined_.end()) {
 			to_return.insert(to_return.end(), miter->second.begin(), miter->second.end());
@@ -1066,9 +1022,6 @@ vector<DrtVect> Sense::getCandidateNegative(int lexname)
 	vector<DrtVect> to_return;
 	MapIntDrt::iterator miter = sense_negative_.find(lexname);
 
-	if (debug) {
-		cout << "CANDIDATE_NEGATIVE::: " << lexname << endl;
-	}
 
 	if (miter != sense_negative_.end()) {
 		to_return = miter->second;
@@ -1138,10 +1091,6 @@ static double get_multiplier(const DrtVect &drtvect)
 			string levin1 = d->get_levin_noun(extract_header(drtvect.at(m1)));
 			string levin2 = d->get_levin_noun(extract_header(drtvect.at(m2)));
 
-			if (debug) {
-				cout << "MULT2::: " << drtvect.at(m1) << ", " << levin1 << ", " << drtvect.at(m2) << ", " << levin2 << endl;
-
-			}
 
 			if (levin1 == levin2)
 				to_return += 1;
@@ -1172,9 +1121,6 @@ double Sense::rateVerbs(DrtVect drtvect)
 		DrtVect dvect = candidate_verbs.at(m).second;
 		double multiplier = get_multiplier(dvect);
 
-		if (debug) {
-			cout << "MULTIPLIER::: " << multiplier << endl;
-		}
 
 		for (int n = 0; n < lexnames.size(); ++n) {
 			vector<DrtVect> cdrts = this->getCandidateImpossibleDrtVect(lexnames.at(n));
@@ -1188,9 +1134,6 @@ double Sense::rateVerbs(DrtVect drtvect)
 				question = name_unifiers(question);
 				double tmp_w2 = match.singlePhraseMatch(dvect, question, &msubs, mi);
 				if (tmp_w2 != 0) {
-					if(debug) {
-						cout << "IMPOSSIBLE_W::: " << tmp_w2 << endl;
-					}
 					return -2;
 				}
 			}
@@ -1200,9 +1143,6 @@ double Sense::rateVerbs(DrtVect drtvect)
 		double tmp_w = 0;
 		for (int n = 0; n < lexnames.size() && continue_loop; ++n) {
 			vector<DrtVect> cdrts = this->getCandidateDrtVect(lexnames.at(n));
-			if (debug) {
-				cout << "LX2::: " << lexnames.size() << "," << cdrts.size() << endl;
-			}
 			for (int j = 0; j < cdrts.size(); ++j) {
 				if (debug)
 					print_vector(cdrts.at(j));
@@ -1246,18 +1186,12 @@ double Sense::rateVerbs(DrtVect drtvect)
 			w += 1; // if there is no specific sense for this rule, but the verb was in Wordnet, add 1 to the sense
 			vector<DrtVect> cdrts2;
 			cdrts2 = this->getCandidateCombined(drtvect, cverbs.front());
-			if (debug) {
-				cout << "LX3::: " << cverbs.front() << "," << cdrts2.size() << endl;
-			}
 			for (int j = 0; j < cdrts2.size(); ++j) {
 				MatchSubstitutions msubs;
 				DrtVect question(cdrts2.at(j));
 				std::stringstream ss;
 				print_vector_stream(ss, question);
 
-				if (debug) {
-					cout << "QUESTION:::" << ss.str() << endl;
-				}
 
 				pair<double, int> drt_weight = get_map_element(sense_weight_, ss.str());
 				question = name_unifiers(question);
@@ -1286,9 +1220,6 @@ double Sense::rateNouns(DrtVect drtvect)
 	double w = 0;
 	vector<pair<string, DrtVect> > candidate_nouns = find_candidate_nouns(drtvect);
 
-	if (debug) {
-		std::cerr << "CNOUNS::: " << candidate_nouns.size() << endl;
-	}
 
 	Knowledge k;
 	Match match(&k);
@@ -1304,16 +1235,8 @@ double Sense::rateNouns(DrtVect drtvect)
 				DrtVect question(cdrts.at(j));
 				std::stringstream ss;
 				print_vector_stream(ss, question);
-				if (debug) {
-					std::cerr << "CNOUNS::: " << cdrts.size() << " " << lexnames.at(n) << " " << candidate_nouns.size()
-							<< endl;
-					std::cerr << "CNOUNS::: " << ss.str() << endl;
-				}
 				question = name_unifiers(question);
 				double wtmp = match.singlePhraseMatch(drtvect_tmp, question, &msubs, false, false);
-				if(debug) {
-					std::cerr << "WTMP:::" << wtmp << endl;
-				}
 				if(wtmp != 0) {
 					//w += wtmp;
 					w +=1;
@@ -1407,9 +1330,6 @@ vector<tuple<string, string, double, int> > Sense::getCombinedLines()
 		tuple<string, string, double, int> item;
 		vector<DrtVect> drtvects = miter->second;
 
-		if (debug) {
-			puts("LINES:::");
-		}
 
 		for (int n = 0; n < drtvects.size(); ++n) {
 

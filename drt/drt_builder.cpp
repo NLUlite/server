@@ -199,9 +199,6 @@ static vector<DrtPred> process_names(vector<DrtPred> names, int pos1, int pos2)
 		tmp_drt.setTag(names.at(pos1).tag());
 		tmp_drt.set_pivot(names.at(pos1).is_pivot());
 		names.at(pos1) = tmp_drt;
-		if(debug) {
-			cout << "PROCESS_NAMES::: " << str2child << " " << str1child << endl;
-		}
 		names= substitute_ref(names,str1child,str2child);
 	} else {
 		DrtPred tmp_drt(str2 + "(" + str1child + ")");
@@ -390,12 +387,6 @@ static vector<DrtPred> process_preposition_from(vector<DrtPred> names, int pos1,
 	if ( names.at(pos2).tag() == "CC"
 	    && !( element_is_specification_end && !element_was_specification_end)
 	) {
-		if(debug) {
-			cout << "CC_PREV1::: " << subj2 << " " << last_subj2 << endl;
-			cout << "CC_PREV2::: " << element_is_specification_end
-					<< " "
-					<< element_was_specification_end << endl;
-		}
 		return names;
 	}
 
@@ -457,12 +448,6 @@ static vector<DrtPred> process_preposition_from_preposition(vector<DrtPred> name
 	if ( names.at(pos2).tag() == "CC"
 	    && !( element_is_specification_end && !element_was_specification_end)
 	) {
-		if(debug) {
-			cout << "CC_PREV1::: " << subj2 << " " << last_subj2 << endl;
-			cout << "CC_PREV2::: " << element_is_specification_end
-					<< " "
-					<< element_was_specification_end << endl;
-		}
 		return names;
 	}
 
@@ -488,10 +473,6 @@ static vector<DrtPred> process_preposition_from_preposition(vector<DrtPred> name
 
 static vector<DrtPred> process_preposition_to(vector<DrtPred> names, int pos1, int pos2)
 {
-	if(debug) {
-		cout << "PREP_TO::: " << endl;
-		print_vector(names);
-	}
 
 	string str1 = extract_header(names.at(pos1));
 	string str2 = extract_header(names.at(pos2));
@@ -623,12 +604,6 @@ static vector<DrtPred> process_conj_prev(vector<DrtPred> names, int pos1, int po
 	if(old_pos != -1)
 		element_was_specification_end = is_specification_end(names,old_pos);
 
-	if(debug) {
-		cout << "CONJ_PREV1::: " << subj2 << " " << last_subj2 << endl;
-		cout << "CONJ_PREV2::: " << element_is_specification_end
-			<< " "
-			<< element_was_specification_end << endl;
-	}
 
 	if (distance2 != 0 && distance1 > distance2
 	    && !( element_is_specification_end && !element_was_specification_end)
@@ -768,10 +743,6 @@ static vector<DrtPred> get_not_connected(const DrtVect &orig_drt, const vector<D
 		}
 	}
 
-	if (debug) {
-		std::cout << "UNCONNECTED:: " << std::endl;
-		print_vector(not_connected);
-	}
 
 	return not_connected;
 }
@@ -833,9 +804,6 @@ static double compute_likeliness(vector<DrtPred> &drt, const vector<string> &tag
 
 	for (int n = 0; n < size; ++n) {
 		string head = extract_header(drt.at(n));
-		if (debug) {
-			cout << "RP::: " << drt.at(n).tag() << "," << head << endl;
-		}
 		if (drt.at(n).tag() == "RP" && head.find(":DELETE") == string::npos) {
 			*error = (string) "lonely_RP" + "(" + boost::lexical_cast<string>(n) + ")";
 			return -1; // isolated RP mean that the phrase is not parsed correctly
@@ -865,17 +833,11 @@ static double compute_likeliness(vector<DrtPred> &drt, const vector<string> &tag
 					continue;
 				if ((drt.at(n).name() == "to" || drt.at(n).name() == "that" || drt.at(n).name() == "if" || drt.at(n).name() == "whether" )
 						&& drt.at(m).tag() == "VBG") {
-					if (debug) {
-						cout << "WRONG_TENSE_FOR_SUBORD1::: " << drt.at(n).tag() << " " << drt.at(n).name() << endl;
-					}
 					*error = DrtPred( (string) "wrong_tense_for_subordinate_VBG" + "(" + boost::lexical_cast<string>(n) + ")" );
 					return -1; // of reaches/VBZ is not correct (of only support VBG)
 				}
 				if (drt.at(n).name() == "of"
 						&& drt.at(m).tag() != "VBG") {
-					if (debug) {
-						cout << "WRONG_TENSE_FOR_SUBORD2::: " << drt.at(n).tag() << " " << drt.at(n).name() << endl;
-					}
 					*error = DrtPred( (string) "wrong_tense_for_subordinate_non-VBG" + "(" + boost::lexical_cast<string>(n) + ")" );
 					return -1;
 				}
@@ -886,9 +848,6 @@ static double compute_likeliness(vector<DrtPred> &drt, const vector<string> &tag
 			int num = num_elements_connected(drt, sref);
 			bool has_plural = has_plural_ref(drt, sref);
 			if (num != 2 && !has_plural) {
-				if (debug) {
-					cout << "TIME_BETWEEN_TAG::: " << drt.at(n).tag() << endl;
-				}
 				*error = DrtPred( (string) "unprocessed_BETWEEN" + "(" + boost::lexical_cast<string>(n) + ")" );
 				return -1;
 			}
@@ -898,9 +857,6 @@ static double compute_likeliness(vector<DrtPred> &drt, const vector<string> &tag
 			string sref = extract_second_tag(drt.at(n));
 			;
 			if (!has_first_tag(fref)) {
-				if (debug) {
-					cout << "COMPLEMENT_WITH_NO_PRIOR::: " << drt.at(n).tag() << endl;
-				}
 				*error = DrtPred( (string) "complement_with_no_prior" + "(" + boost::lexical_cast<string>(n) + ")" );
 				return -1;
 			}
@@ -977,9 +933,6 @@ static double compute_likeliness(vector<DrtPred> &drt, const vector<string> &tag
 					&& extract_header(drt.at(m)).find(":DELETE") == string::npos
 					&& !is_AUX(drt.at(n))
 			) {
-				if (debug) {
-					cout << "PREP_AND_SUBJ::: " << drt.at(n) << " " << drt.at(m) << endl;
-				}
 				*error = DrtPred( (string) "preposition_and_subject" + "(" + boost::lexical_cast<string>(n) + ")" );
 				return -1;
 			}
@@ -1046,9 +999,6 @@ static double compute_likeliness(vector<DrtPred> &drt, const vector<string> &tag
 				&& !is_singular_exception(drt,n)
 				&& ((verb_is_singular(drt.at(n), drt) && drt.at(n).tag() == "VBP")
 						|| (!verb_is_singular(drt.at(n), drt) && drt.at(n).tag() == "VBZ"))) {
-			if (debug) {
-				puts("SINGULAR::: ");
-			}
 			*error = DrtPred( (string) "wrong_tense_for_singular" + "(" + boost::lexical_cast<string>(n) + ")" );
 			return -1;
 		}
@@ -1058,18 +1008,12 @@ static double compute_likeliness(vector<DrtPred> &drt, const vector<string> &tag
 			&& !drt.at(n).is_delete()
 			&& extract_first_tag(drt.at(n)) == extract_second_tag(drt.at(n))
 		) {
-			if (debug) {
-				puts("FLAT_COMPLEMENT::: ");
-			}
 			*error = DrtPred( (string) "flat_complement" + "(" + boost::lexical_cast<string>(n) + ")" );
 			return -1;
 		}
 
 		// check that the subject (plural, singular) matches the verb
 		if (drt.at(n).is_verb() && has_object(drt.at(n))) {
-			if (debug) {
-				puts("CC_OBJECT::: ");
-			}
 			string oref = extract_object(drt.at(n));
 			vector<int> poz = find_all_names_with_string_no_delete(drt,oref);
 			if(poz.size() == 0) {
@@ -1082,9 +1026,6 @@ static double compute_likeliness(vector<DrtPred> &drt, const vector<string> &tag
 		vector<DrtVect> conn = get_linked_drtvect_from_single_drtvect(drt);
 		vector<DrtPred> nc   = get_not_connected(drt, conn);
 		if ( nc.size() && has_verb(drt) ) {
-			if (debug) {
-				puts("UNCONNECTED::: ");
-			}
 			*error = DrtPred( (string) "unconnected_nouns" + "(" + boost::lexical_cast<string>(n) + ")" );
 			return -1;
 		}
@@ -1504,9 +1445,6 @@ static vector<DrtPred> resolve_THAT(vector<DrtPred> &pre_drt, const vector<strin
 					add_header(to_return.at(pos_THAT), ":DELETE");
 					to_return.push_back(gen_pred);
 				}
-			}
-			if (debug) {
-				puts("THAT_NAME:::");
 			}
 			pos_THAT = pos_name = pos_verb = pos_second_verb = -1;
 		}
@@ -1994,9 +1932,6 @@ static bool aux_on_left(const DrtVect &pre_drt, int n2, int m2)
 	string str1 = extract_header(pre_drt.at(n));
 	string str2 = extract_header(pre_drt.at(m));
 
-	if (debug) {
-		cout << "AUX_HEADER:::" << str1;
-	}
 
 	if (str1 == "have" && str2 == "be")
 		return true; // beware of the double auxiliary!
@@ -2033,9 +1968,6 @@ static vector<DrtPred> collapse_verbs(vector<DrtPred> &pre_drt, const vector<str
 		tag = tags.at(n);
 		if (is_verb(tag)) {
 			int m = find_coupled_verb(pre_drt, tags, n);
-			if (debug) {
-				cout << "COUPLED" << m << endl;
-			}
 
 			if (m != -1 && m != n && find(verb_pairs.begin(), verb_pairs.end(), make_pair(m, n)) == verb_pairs.end()
 					&& find(verb_pairs.begin(), verb_pairs.end(), make_pair(n, m)) == verb_pairs.end()) {
@@ -2079,9 +2011,6 @@ static vector<DrtPred> collapse_verbs(vector<DrtPred> &pre_drt, const vector<str
 		std::cout << names.at(pos1) << " (" << pos1 << ", " << tags.at(pos1) << ")" << arrow << names.at(pos2) << " (" << pos2
 				<< ", " << tags.at(pos2) << ")" << std::endl;
 
-	}
-	if (debug) {
-		std::cout << "------------" << std::endl;
 	}
 
 	// recognizes the tense of the the base verb, save it, and sign
@@ -2333,10 +2262,6 @@ static vector<DrtPred> collapse_verbs(vector<DrtPred> &pre_drt, const vector<str
 		}
 	}
 
-	if (debug) {
-		puts("LAST_COLLAPSE:::");
-		print_vector(to_return);
-	}
 
 	// Process the future tense. Up to this point, the future tense
 	// is represented in two predicates @TIME(verbx,future) and
@@ -2981,16 +2906,10 @@ static bool points_to_unit_of_measure(const DrtVect &drtvect, const DrtPred &pre
 	bool is_unit = false, has_number = false;
 	for (int n = 0; n < poz.size(); ++n) {
 		if (is_unit_of_measure(extract_header(drtvect.at(poz.at(n))))) {
-			if (debug) {
-				cout << "MEASURE::: " << drtvect.at(poz.at(n)) << endl;
-			}
 			is_unit = true;
 		}
 		// the unit must be connected to a quantity: "he is 100 km from home."
 		if (drtvect.at(poz.at(n)).tag() == "CD") {
-			if (debug) {
-				cout << "CD::: " << drtvect.at(poz.at(n)) << endl;
-			}
 			has_number = true;
 		}
 	}
@@ -3751,9 +3670,6 @@ static string find_WP_matching_previous_name(const vector<DrtPred> &pre_drt, con
 		if (!is_subject_of_verb(pre_drt, fref) && !is_object_of_verb(pre_drt, fref))
 			continue;
 		double w = get_pred_string_vector_distance(d, pre_drt.at(j), candidates);
-		if (debug) {
-			cout << "WP_MATCH1::: " << w << " " << j << " " << need_plural << " " << old_w << " " << name << endl;
-		}
 		bool is_plural = pre_drt.at(j).is_plural();
 		if (need_plural && is_plural != need_plural)
 			continue;
@@ -3761,9 +3677,6 @@ static string find_WP_matching_previous_name(const vector<DrtPred> &pre_drt, con
 			owner_str = extract_first_tag(pre_drt.at(j));
 			already_assigned = true;
 			old_w = w;
-			if (debug) {
-				cout << "WP_MATCH2::: " << w << " " << owner_str << endl;
-			}
 		}
 	}
 	// Tries all the rest
@@ -3774,18 +3687,12 @@ static string find_WP_matching_previous_name(const vector<DrtPred> &pre_drt, con
 		if (is_specification_end(pre_drt, j))
 			continue;
 		double w = get_pred_string_vector_distance(d, pre_drt.at(j), candidates);
-		if (debug) {
-			cout << "WP_MATCH1::: " << w << " " << j << " " << need_plural << " " << old_w << " " << name << endl;
-		}
 		bool is_plural = pre_drt.at(j).is_plural();
 		if (need_plural && is_plural != need_plural)
 			continue;
 		if (w > 0.8 && w > old_w) {
 			owner_str = extract_first_tag(pre_drt.at(j));
 			old_w = w;
-			if (debug) {
-				cout << "WP_MATCH2::: " << w << " " << owner_str << endl;
-			}
 		}
 	}
 
@@ -3903,16 +3810,10 @@ static vector<DrtPred> resolve_and_to(vector<DrtPred> to_return, const vector<st
 	for (int n = 0; n < to_return.size(); ++n) {
 		string fref= extract_first_tag (to_return.at(n) );
 		string sref= extract_second_tag(to_return.at(n) );
-		if(debug) {
-			cout << "TO0::" << to_return.at(n) << endl;
-		}
 		if( is_conj(to_return.at(n).tag()) && ref_is_verb(fref)
 				&& !has_second_tag(to_return.at(n))
 		) {
 			int m = find_prep_with_first_tag(to_return,tags,sref,"to");
-			if(debug) {
-				cout << "TO::" << sref << endl;
-			}
 			if(m == -1)
 				continue;
 			string sref2= extract_second_tag(to_return.at(m) );
@@ -3941,9 +3842,6 @@ static vector<DrtPred> resolve_WDT_lazy(vector<DrtPred> &pre_drt, const vector<s
 			} else {
 				pointed_ref = find_WP_matching_previous_name(pre_drt, tags, n, names.at(n), need_plural);
 			}
-			if (debug) {
-				cout << "WDT_LAZY2::: " << pointed_ref << endl;
-			}
 			if (pointed_ref == "" && !need_plural) {
 				// If nothing was found try to search for a plural
 				need_plural = true;
@@ -3959,9 +3857,6 @@ static vector<DrtPred> resolve_WDT_lazy(vector<DrtPred> &pre_drt, const vector<s
 	for (int n = 0; n < ref_pair.size(); ++n) {
 		string ref = ref_pair.at(n).first;
 		string name = ref_pair.at(n).second;
-		if (debug) {
-			cout << "WDT_LAZY::: " << ref << " " << name << endl;
-		}
 		to_return = substitute_ref(to_return, ref, name);
 	}
 	return to_return;
@@ -4117,18 +4012,11 @@ static vector<DrtPred> process_prep_WDT_from_verb(const vector<DrtPred> &pre_drt
 				continue;
 			}
 			m = find_verb_with_object(to_return, tags, wdt_ref);
-			if (debug) {
-				cout << "FIND_OBJ::: " << m << " " << wdt_ref << endl;
-			}
 			if (m != -1 && extract_first_tag(to_return.at(m)) == verb_ref) {
 				implant_object(to_return.at(m), "none");
 				continue;
 			}
 		}
-	}
-	if (debug) {
-		puts("FROM_VERB::");
-		print_vector(to_return);
 	}
 
 	return to_return;
@@ -4159,9 +4047,6 @@ static vector<DrtPred> process_WP_from_AUX(const vector<DrtPred> &pre_drt, const
 			int cref = find_complement_with_target(to_return,fref);
 			if (cref != -1)
 				continue;
-			if (debug) {
-				cout << "WP_REF2::: " << fref << endl;
-			}
 			string vref = extract_object(to_return.at(pos2));
 			int m = find_verb_with_string(to_return, vref);
 			if (m == -1)
@@ -4204,9 +4089,6 @@ static vector<DrtPred> process_WP(const vector<DrtPred> &pre_drt, const vector<s
 			if (pre_drt.at(n).is_question()) {
 				tmp_wp.set_question();
 				tmp_wp.set_question_word(name_str);
-				if (debug) {
-					cout << names.at(n) << endl;
-				}
 			}
 
 			add_header(to_return.at(n), ":DELETE");
@@ -4478,19 +4360,12 @@ static vector<DrtPred> collapse_OR(const vector<DrtPred> &pre_drt, const vector<
 
 	for (int n = 0; n < size; ++n) {
 		string head_str = extract_header(to_return.at(n));
-		if(debug) {
-			cout << "CO0R::: " << head_str << endl;
-		}
 		if (pre_drt.at(n).is_conj() && head_str == "or") {
 			string fref = extract_first_tag (to_return.at(n));
 			string sref = extract_second_tag(to_return.at(n));
 
 			int m1 = find_name_with_string(to_return, fref);
 			int m2 = find_name_with_string(to_return, sref);
-			if(debug) {
-				cout << "COR::: " << m1 << endl;
-				cout << "COR::: " << m2 << endl;
-			}
 
 			if (m1 == -1 || m2 == -1)
 				continue;
@@ -4650,9 +4525,6 @@ static vector<DrtPred> sign_some_predicates_as_questions(vector<DrtPred> pre_drt
 			string ref_str = extract_first_tag(*diter);
 			vector<int> preds_int = find_all_element_with_string(pre_drt, ref_str);
 			for (int m = 0; m < preds_int.size(); ++m) {
-				if (debug) {
-					cout << "WRB::: " << m << " " << pre_drt.at(preds_int.at(m)) << endl;
-				}
 				if (preds_int.at(m) < tags.size() && (is_WP(tags.at(preds_int.at(m))) || is_WRB(tags.at(preds_int.at(m))))) {
 					string head = extract_header(pre_drt.at(preds_int.at(m)));
 					pre_drt.at(preds_int.at(m)).set_question();
@@ -4766,9 +4638,6 @@ static vector<DrtPred> process_declaratives(const vector<DrtPred> &pre_drt, cons
 
 				int m = find_verb_with_string(to_return, tags, fref);
 
-				if (debug) {
-					cout << "PROCESS_DECL:::" << m << ", " << n << endl;
-				}
 
 				if (m != -1) {
 					if (has_subject(to_return.at(m)) && m > n) {
@@ -6015,15 +5884,9 @@ bool contain_fake_question(const vector<DrtPred> &predicates)
 static bool subject_is_EX(const DrtVect &drtvect, int pos)
 {
 	vector<DrtPred> subj = find_subject_of_verb(drtvect, pos);
-	if (debug) {
-		cout << "EX2:: " << subj.size() << endl;
-	}
 	if (subj.size() == 0)
 		return false;
 	for (int n = 0; n < subj.size(); ++n) {
-		if (debug) {
-			cout << "EX:: " << subj.at(n) << " " << subj.at(n).tag() << endl;
-		}
 		if (subj.at(n).tag() == "EX")
 			return true;
 	}
@@ -6139,13 +6002,6 @@ vector<DrtPred> tough_move(vector<DrtPred> pre_drt, const vector<pair<pair<int, 
 
 			if (is_adjective(tags.at(pos_adj)) && is_verb(tags.at(pos_verb_aux))) {
 				tough_trigger = true;
-				if (debug) {
-					cout << adj << " " << pos_adj << endl;
-					cout << subj << " " << pos_subj << endl;
-					cout << obj << " " << pos_obj << endl;
-					cout << toverb << " " << pos_toverb << endl;
-					cout << "verb_aux: " << pos_verb_aux << endl;
-				}
 				break;
 			}
 		}
@@ -6259,14 +6115,7 @@ static vector<DrtPred> internal_anaphoras_backward(vector<DrtPred> &pre_drt, con
 					continue;
 				}
 				string head_str = extract_header(name_refs.at(m));
-				if (debug) {
-					cout << "PRP_STRS::: " << head_str << ", ";
-					print_vector(PRP_strs);
-				}
 				double tmp_weight = get_string_vector_distance(d, head_str, PRP_strs);
-				if (debug) {
-					cout << "PRP_STRS2::: " << tmp_weight << endl;
-				}
 				if (tmp_weight > 0.8 && tmp_weight > chosen_ref_weight) {
 					chosen_ref = m;
 					chosen_ref_weight = tmp_weight;
@@ -6285,9 +6134,6 @@ static vector<DrtPred> internal_anaphoras_backward(vector<DrtPred> &pre_drt, con
 				if(m != -1 && find_complement_with_first_and_second_tag(to_return,extract_first_tag(to_return.at(m)),PRP_ref) != -1  )
 					continue; // You cannot do anaphora with an object from the end of the complement -> likeliness == -1
 
-				if(debug) {
-					cout << "ANAPHORA_BACKWARD:: " << subst_ref << " " << PRP_ref << endl;
-				}
 
 				elements_to_delete.push_back(n);
 				ref_pair.push_back(make_pair(PRP_ref, subst_ref));
@@ -6601,18 +6447,12 @@ static vector<DrtPred> process_switched_allocution(const vector<DrtPred> &pre_dr
 			vector<int> subj_poz  = find_all_names_with_string_no_delete(to_return, subj);
 			vector<int> alloc_poz = find_all_names_with_string_no_delete(to_return, sref);
 
-			if(debug) {
-				cout << "@ALLOCUTION:::" << subj << endl;
-			}
 
 			if (subj_poz.size() == 0 || alloc_poz.size() == 0)
 				continue;
 
 			bool subj_is_verbatim  = list_has_only_verbatims(to_return, subj_poz);
 			bool alloc_is_verbatim = list_has_only_verbatims(to_return, alloc_poz);
-			if(debug) {
-				cout << "@ALLOCUTION2:::" << subj_is_verbatim << " " << alloc_is_verbatim << endl;
-			}
 
 			if ((subj_is_verbatim && !alloc_is_verbatim)) {
 				// switch @ALLOC and the subject
@@ -6930,9 +6770,6 @@ static DrtVect process_time_duration(DrtVect to_return, const vector<string> &ta
 			m = find_name_with_string(to_return,sref);
 			if ( m != -1 ) {
 				string nheader = extract_header(to_return.at(m));
-				if(debug) {
-					cout << "DURATIONS::: " << nheader << " " << m << endl;
-				}
 				if ( shortfind(duration_nouns,nheader) ) {
 					implant_header(to_return.at(n),"@TIME_DURATION");
 					to_return.at(n) = percolate_to_verb(to_return,tags,n);
@@ -7458,9 +7295,6 @@ vector<DrtPred> commas_and_adverb(const vector<DrtPred> &pre_drt, const vector<s
 			string sref = extract_second_tag(to_return.at(n));
 			if (!ref_is_verb(fref) && ref_is_verb(sref)) {
 
-				if (debug) {
-					cout << "COMMAS_ADV::: " << fref << " " << sref << endl;
-				}
 
 				vector<int> poz = find_all_adverbs_with_string(to_return, fref);
 				vector<int> poz_names = find_all_names_with_string_no_delete(to_return, fref);
@@ -7541,22 +7375,13 @@ static DrtVect percolate_subject_to_subordinates(DrtVect to_return, const vector
 
 			bool has_dative= false;
 			if(m_obj1 == -1) {
-				if(debug) {
-					cout << "DATIVE::: " << m_obj1 << endl;
-				}
 				int m_dative= find_complement_with_first_tag(to_return,vref,"@DATIVE");
-				if(debug) {
-					cout << "DATIVE2::: " << m_dative << " " << vref << endl;
-				}
 				if(m_dative == -1)
 					continue;
 				has_dative = true;
 				o1 = extract_second_tag(to_return.at(m_dative));
 				add_header(to_return.at(m_dative),":DELETE");
 				m_obj1= find_element_with_string(to_return,o1);
-				if(debug) {
-					cout << "DATIVE3::: " << m_obj1 << endl;
-				}
 				if(m_obj1 == -1)
 					continue;
 			}
@@ -7837,10 +7662,6 @@ vector<DrtPred> resolve_articles(const vector<DrtPred> &pre_drt, const vector<st
 		tag1 = tags.at(pos1);
 		tag2 = tags.at(pos2);
 
-		if(debug) {
-			cout << "ARTICLES::: " << tag1 << " " << tag2 << " " << mask->at(pos1) << " " << mask->at(pos2) << endl;
-			print_vector(to_return);
-		}
 
 		if (tag1 == "DT" && is_name(tag2) && mask->at(pos1) && mask->at(pos2)) {
 			to_return = process_articles(to_return, pos1, pos2);
@@ -7981,9 +7802,6 @@ static DrtVect percolate_last_prepositions_to_verbs(const vector<DrtPred> &pre_d
 	for(int n=0; n < to_return.size()-1; ++n) {
 		if(to_return.at(n+1).tag() == "-period-" && to_return.at(n).is_preposition() ) {
 			to_return.at(n) = percolate_to_verb(to_return, tags, n );
-			if(debug) {
-				cout << "LAST_PREP:::" << to_return.at(n);
-			}
 		}
 	}
 
@@ -8309,9 +8127,6 @@ static DrtVect process_subordinate_subject(DrtVect to_return, const vector<strin
 				to_return.at(m3).setTag("VBG");
 				to_return.push_back(act_pred);
 				to_return.push_back(genitive_pred);
-				if(debug) {
-					puts("GENITIVE::: ");
-				}
 			}
 		}
 	}
@@ -8346,17 +8161,11 @@ static DrtVect process_subordinate_subject(DrtVect to_return, const vector<strin
 		if ((tag1 == "TO") && is_verb(tag2) && (is_subject(comp, pos1, pos2, constit) || is_object(comp, pos1, pos2, constit))
 				&& !has_subject(to_return.at(pos2)) && !is_AUX(to_return.at(pos1)) // a VBG that is AUX cannot be subject
 		) {
-			if(debug) {
-				cout << "TO233::: " << pos1 << " " << pos2 << endl;
-			}
 			string header1 = extract_header(to_return.at(pos2));
 			if(header1 == "make" || header1 == "let")
 				continue;
 			string sref = extract_first_tag(to_return.at(pos1));
 			int m = find_verb_with_string(to_return, sref);
-			if(debug) {
-				cout << "TO234::: " << pos1 << " " << pos2 << " " << m << endl;
-			}
 			if (m == -1)
 				continue;
 			if( !(pos1 == 0
@@ -8379,9 +8188,6 @@ static DrtVect process_subordinate_subject(DrtVect to_return, const vector<strin
 			to_return.push_back(genitive_pred);
 
 			int m_sub = find_complement_with_first_tag(to_return, vref2, "@SUBORD");
-			if(debug) {
-				cout << "TO222::: " << vref2 << " " << m_sub << endl;
-			}
 			if (m_sub == -1)
 				continue;
 			string sub_ref2 = extract_second_tag(to_return.at(m_sub));
@@ -8494,9 +8300,6 @@ static DrtVect RNR_for_adverbs(DrtVect orig, const vector<string> &tags, const v
 			int m= find_complement_with_target(orig,fref);
 			if(m == -1)
 				continue;
-			if(debug) {
-				cout << "TARGET::: " << orig.at(m) << endl;
-			}
 			string header = extract_header(orig.at(m));
 			if(header != "@CONJUNCTION" &&  header != "@COORDINATION")
 				continue;
@@ -8766,10 +8569,6 @@ boost::tuple<DrtVect, DrtVect, DrtPred> drt_builder::get_drt_form()
 	vector<string> tags = phrase_->get_tags();
 	vector<constituents> constit_list = phrase_->get_constit();
 	vector<int> prn_depths= phrase_->get_prn_depths();
-	if(debug) {
-		puts("PRN_DEPTHS:::");
-		print_vector(prn_depths);
-	}
 
 	vector<pair<pair<int, int>, constituents> > connections = phrase_->get_connections();
 	composition comp = phrase_->get_composition();
@@ -8807,9 +8606,6 @@ boost::tuple<DrtVect, DrtVect, DrtPred> drt_builder::get_drt_form()
 		}
 	}
 
-	if (debug) {
-		print_vector(to_return);
-	}
 	for (int n = 0; n < connections.size(); ++n) { // Process adjectives
 		pos1 = connections.at(n).first.first;
 		pos2 = connections.at(n).first.second;
@@ -8825,9 +8621,6 @@ boost::tuple<DrtVect, DrtVect, DrtPred> drt_builder::get_drt_form()
 			to_return = process_adjectives(to_return, pos1, pos2);
 	}
 
-	if (debug) {
-		print_vector(to_return);
-	}
 	for (int n = 0; n < connections.size(); ++n) { // Process wh-determiners (which, ...) and wh-adverbs (what, where, ...)
 		pos1 = connections.at(n).first.first;
 		pos2 = connections.at(n).first.second;
@@ -8852,9 +8645,6 @@ boost::tuple<DrtVect, DrtVect, DrtPred> drt_builder::get_drt_form()
 			else
 				to_return = process_WRB_to(to_return, pos2, pos1);
 		}
-	}
-	if (debug) {
-		print_vector(to_return);
 	}
 	for (int n = 0; n < connections.size(); ++n) { // Process verbs
 		pos1 = connections.at(n).first.first;
@@ -8926,10 +8716,6 @@ boost::tuple<DrtVect, DrtVect, DrtPred> drt_builder::get_drt_form()
 				}
 			}
 		}
-		if (debug) {
-			puts("VERBS_PPP:::");
-			print_vector(to_return);
-		}
 
 	}
 
@@ -8953,10 +8739,6 @@ boost::tuple<DrtVect, DrtVect, DrtPred> drt_builder::get_drt_form()
 	}
 
 
-	if (debug) {
-		puts("VERBS:::");
-		print_vector(to_return);
-	}
 
 	for (int ncycles = 0; ncycles < 2; ++ncycles) {
 		/// BAD SOLUTION: the problem are prepositions that are
@@ -9025,9 +8807,6 @@ boost::tuple<DrtVect, DrtVect, DrtPred> drt_builder::get_drt_form()
 				to_return = process_comparative_adverb(to_return, pos2, pos1);
 		}
 	}
-	if (debug) {
-		print_vector(to_return);
-	}
 
 	to_return = resolve_and_to(to_return, tags, names, is_question);
 	to_return = resolve_WDT_lazy(to_return, tags, names, is_question);
@@ -9069,10 +8848,6 @@ boost::tuple<DrtVect, DrtVect, DrtPred> drt_builder::get_drt_form()
 			to_return = substitute_subj_or_obj_with_string(WP_ref, verb_ref, to_return, tags);
 		}
 	}
-	if (debug) {
-		puts("WPVERBS:::");
-		print_vector(to_return);
-	}
 
 	to_return = process_hashtags(to_return, tags, names); // modifies the names!
 
@@ -9109,11 +8884,6 @@ boost::tuple<DrtVect, DrtVect, DrtPred> drt_builder::get_drt_form()
 
 	to_return = percolate_last_prepositions_to_verbs(to_return, tags, names, connections);
 
-	if (debug) {
-		puts("MISSING0::");
-		print_vector(to_return);
-
-	}
 
 	for (int n = 0; n < connections.size(); ++n) {
 // if conjunctions are not connected to anything, then tries to
@@ -9139,11 +8909,6 @@ boost::tuple<DrtVect, DrtVect, DrtPred> drt_builder::get_drt_form()
 				to_return = process_conj_next(to_return, pos2, pos1);
 		}
 	}
-	if (debug) {
-		puts("MISSING::");
-		print_vector(to_return);
-
-	}
 
 	to_return = process_ifs_with_last_verb(to_return, tags, names, connections);
 	to_return = process_WRB_to_nouns(to_return, tags, names, connections);
@@ -9160,9 +8925,6 @@ boost::tuple<DrtVect, DrtVect, DrtPred> drt_builder::get_drt_form()
 		if ((is_preposition(tag1) || is_WRB(tag1) || is_comma(tag1)) && mask.at(pos1)) {
 			if (first_tag_is_incomplete(to_return.at(pos1)) || (points_to_WDT(to_return, pos1) && !is_question)) { // The preposition does not point at any previous element
 
-				if(debug) {
-					cout << "FT_WRB::: " << to_return.at(pos1) << endl;
-				}
 
 
 				int pos1_verb, pos2_verb;
@@ -9179,18 +8941,12 @@ boost::tuple<DrtVect, DrtVect, DrtPred> drt_builder::get_drt_form()
 					if (pos2_verb == -1) {
 						pos2_verb = percolate_to_name_integer(to_return, tags, pos2);
 					}
-					if(debug) {
-						cout << "FT_WRB2::: " << pos1_verb << " " << pos2_verb << endl;
-					}
 				} else
 					pos2_verb = pos2;
 				pos1_verb = percolate_second_tag_to_verb_integer(to_return, tags, pos1);
 				if (pos1_verb == -1)
 					pos1_verb = percolate_to_name_integer(to_return, tags, pos1);
 
-				if(debug) {
-					cout << "FT_WRB3::: " << pos1_verb << " " << pos2_verb << endl;
-				}
 				if(pos1_verb == pos2_verb)
 					pos2_verb= pos2;
 
@@ -9238,20 +8994,12 @@ boost::tuple<DrtVect, DrtVect, DrtPred> drt_builder::get_drt_form()
 
 	}
 
-	if (debug) {
-		puts("AFTER_MISSING:::");
-		print_vector(to_return);
-	}
 
 	// some preposition might be linked to conjunctions that point to verbs
 	to_return = commas_and_preposition(to_return, tags, names);
 
 	// some adverbs might be linked to conjunctions that point to verbs
 	to_return = commas_and_adverb(to_return, tags, names);
-	if (debug) {
-		puts("AFTER_RB2:::");
-		print_vector(to_return);
-	}
 	to_return = resolve_RB(to_return, tags, names, connections);
 
 	// Associate RP to the verb /// Check if it is an adjunct!
@@ -9281,19 +9029,8 @@ boost::tuple<DrtVect, DrtVect, DrtPred> drt_builder::get_drt_form()
 	to_return = process_unit_of_measure_place(to_return, tags, connections);
 	to_return = convert_thereis_to_exist(to_return, tags, names);
 
-	if (debug) {
-		puts("NAME_COMPL0:::");
-		print_vector(to_return);
-	}
 	to_return = name_complements(to_return, tags, names, is_question);
-	if (debug) {
-		puts("NAME_COMPL:::");
-		print_vector(to_return);
-	}
 	to_return = correct_double_dative(to_return, tags, names, is_question);
-	if (debug) {
-		print_vector(to_return);
-	}
 	to_return = collapse_verbs(to_return, tags, names, prn_depths, is_question);
 
 	for (int n = 0; n < connections.size(); ++n) { // assign missing links to WPs
@@ -9310,9 +9047,6 @@ boost::tuple<DrtVect, DrtVect, DrtPred> drt_builder::get_drt_form()
 			string fref = extract_first_tag(to_return.at(pos2));
 			string sref = extract_second_tag(to_return.at(pos2));
 
-			if (debug) {
-				cout << "DOBASE::: " << sref << endl;
-			}
 
 			int m = find_verb_with_string(to_return, sref);
 			if (m == -1)
@@ -9337,23 +9071,11 @@ boost::tuple<DrtVect, DrtVect, DrtPred> drt_builder::get_drt_form()
 		}
 	}
 	to_return = last_touch_END(to_return, tags, names); // must go BEFORE percolate_subject_to_subordinates
-	if (debug) {
-		puts("BEFORE_RAISING0::: ");
-		print_vector(to_return);
-	}
 	if(!is_question) {
 		to_return = process_subordinate_subject(to_return, tags, names, connections, comp); // must be done before the percolation to subordinates
 	}
-	if (debug) {
-		puts("BEFORE_RAISING1::: ");
-		print_vector(to_return);
-	}
 	if(!is_question) {
 		to_return = percolate_subject_to_subordinates(to_return, tags, names);
-	}
-	if (debug) {
-		puts("BEFORE_RAISING::: ");
-		print_vector(to_return);
 	}
 
 	to_return = process_auxiliary_like_verbs(to_return, tags, names, connections);
@@ -9369,10 +9091,6 @@ boost::tuple<DrtVect, DrtVect, DrtPred> drt_builder::get_drt_form()
 		}
 	}
 
-	if (debug) {
-		puts("AFTER_RAISING::: ");
-		print_vector(to_return);
-	}
 
 	for (int n = 0; n < connections.size(); ++n) {
 		// This must be done after all the subjects and objects are processed
@@ -9396,44 +9114,13 @@ boost::tuple<DrtVect, DrtVect, DrtPred> drt_builder::get_drt_form()
 		}
 	}
 
-	if (debug) {
-		print_vector(to_return);
-	}
 	to_return = attach_comparatives(to_return, tags, names, connections);
-	if (debug) {
-		puts("THAT:::");
-		print_vector(to_return);
-
-	}
 	to_return = prepare_THAT(to_return, tags, names, connections);
-	if (debug) {
-		puts("THAT2:::");
-		print_vector(to_return);
-
-	}
 	to_return = resolve_THAT(to_return, tags, names, connections);
-	if (debug) {
-		puts("AFTER_THAT:::");
-		print_vector(to_return);
-	}
 	to_return = join_verb_with_adverb(to_return, tags, names);
-	if (debug) {
-		puts("BEFORE_SWITCH:::");
-		print_vector(to_return);
-
-	}
 	to_return = process_switched_END(to_return, tags, names); // process_switched_END() must go before resolving internal anaphoras
-	if (debug) {
-		puts("AFTER_SWITCH:::");
-		print_vector(to_return);
-
-	}
 	to_return = internal_anaphoras_backward(to_return, tags, names);
 
-	if (debug) {
-		puts("COORD::: ");
-		print_vector(to_return);
-	}
 
 	to_return = process_coord(to_return, tags, names);
 
@@ -9446,15 +9133,7 @@ boost::tuple<DrtVect, DrtVect, DrtPred> drt_builder::get_drt_form()
 		to_return = sign_some_predicates_as_questions(to_return, tags, names);
 	}
 
-	if (debug) {
-		puts("BEFORE_WP::: ");
-		print_vector(to_return);
-	}
 	to_return = process_WP(to_return, tags, names);
-	if (debug) {
-		puts("AFTER_WP::: ");
-		print_vector(to_return);
-	}
 
 	to_return = process_WP_pos(to_return, tags, names, is_question);
 	to_return = process_WP(to_return, tags, names);
@@ -9468,91 +9147,41 @@ boost::tuple<DrtVect, DrtVect, DrtPred> drt_builder::get_drt_form()
 	to_return = add_nouns_to_quantities(to_return, tags, connections);
 	to_return = add_nouns_to_quantifiers(to_return, tags, connections);
 
-	if (debug) {
-		puts("DELE1::: ");
-		print_vector(to_return);
-	}
 	to_return = add_nouns_to_comparatives(to_return, tags, connections);
-	if (debug) {
-		puts("DELE2::: ");
-		print_vector(to_return);
-	}
 
 	to_return = process_quantities(to_return, tags, connections);
 	to_return = process_quantifiers(to_return, tags, connections);
 	to_return = process_comparatives(to_return, tags, connections);
 	to_return = process_somethings(to_return, connections);
 	to_return = process_declaratives(to_return, tags, names);
-	if (debug) {
-		puts("AFTER_COMP::: ");
-		print_vector(to_return);
-	}
 
 	to_return = process_LBR(to_return, tags, names, connections);
 	to_return = save_name_conjunctions(to_return, tags, names);
 	to_return = process_complements_from_names_and_adverbs(to_return, tags, names);
 	to_return = process_allocutions(to_return, tags, names);
-	if (debug) {
-		puts("AFTER_ALLOC::: ");
-		print_vector(to_return);
-	}
 	to_return = process_switched_allocution(to_return, tags, names);
 	to_return = process_lonely_verbatim(to_return, tags, names);
 	to_return = resolve_composite_comparatives(to_return, tags, names, connections);
 	to_return = process_age(to_return, tags, names);
 	to_return = process_times_RB(to_return, tags, names);
-	if (debug) {
-		puts("AFTER_COMP2::: ");
-		print_vector(to_return);
-	}
 	to_return = process_subordinate_verbs(to_return, tags, names);
-	if (debug) {
-		cout << "SUB:::" << endl;
-		print_vector(to_return);
-	}
 	to_return = last_touch_WRB(to_return, tags, names);
 	to_return = last_touch_commas(to_return, tags, names);
 
-	if (debug) {
-		cout << "LTWP0" << endl;
-		print_vector(to_return);
-	}
 
 	to_return = last_touch_conjunctions(to_return, tags, names);
 	to_return = last_touch_references(to_return, tags, names);
 
 	to_return = process_indirect_allocution(to_return, tags, names, connections);
-	if (debug) {
-		cout << "LTWP1" << endl;
-		print_vector(to_return);
-	}
 
 	to_return = last_touch_WP(to_return, tags, names, connections, is_question);
-	if (debug) {
-		print_vector(to_return);
-	}
 	to_return = process_PAR(to_return, tags, names, connections, is_question);
 	to_return = last_touch_PAR(to_return, tags, names, connections, is_question);
 	to_return = last_touch_time(to_return, tags, names);
 
 	to_return = sign_duplicates(to_return);
-	if (debug) {
-		print_vector(to_return);
-	}
-	if (debug) {
-		cout << "LTWP2" << endl;
-		print_vector(to_return);
-	}
 	to_return = meld_competing_elements(to_return, tags, names, connections);
-	if (debug) {
-		cout << "LTWP3" << endl;
-		print_vector(to_return);
-	}
 	to_return = process_implicit_motion_to(to_return, tags, names);
-	if (debug) {
-		cout << "LTWP4" << endl;
-		print_vector(to_return);
-	}
 	to_return = process_adverbial_place_at(to_return, tags, names);
 	to_return = process_adverbial_time_at(to_return, tags, names);
 	to_return = process_time_between(to_return, tags, names);
@@ -9566,36 +9195,12 @@ boost::tuple<DrtVect, DrtVect, DrtPred> drt_builder::get_drt_form()
 
 	if (contain_question(to_return)) {
 		phrase_->set_question();
-		if (debug) {
-			puts("WH_BEFORE:::");
-			print_vector(to_return);
-		}
 		to_return = process_question_WH_preds(to_return, tags, names, connections);
-		if (debug) {
-			puts("WH_AFTER:::");
-			print_vector(to_return);
-		}
 		to_return = eliminate_redundant_subjects(to_return, tags, names);
 		to_return = eliminate_redundant_objects(to_return, tags, names);
-		if (debug) {
-			print_vector(to_return);
-			puts("LOOSE:::");
-		}
 		to_return = loose_complements(to_return, tags, names);
-		if (debug) {
-			print_vector(to_return);
-			puts("LOOSE2:::");
-		}
 		to_return = percolate_object_to_preposition(to_return, tags, names, connections);
-		if (debug) {
-			print_vector(to_return);
-			puts("LOOSE3:::");
-		}
 		to_return = process_question_WRB_preds(to_return, tags, names, connections);
-		if (debug) {
-			puts("ADJUST_WRB:::");
-			print_vector(to_return);
-		}
 		to_return = adjust_WRB(to_return, tags);
 		//to_return= process_questions_with_final_IN(to_return, tags)
 		// some preposition were not associated to the correct name. They should be now.
@@ -9613,43 +9218,20 @@ boost::tuple<DrtVect, DrtVect, DrtPred> drt_builder::get_drt_form()
 	}
 
 	to_return = duplicate_WRB(to_return, tags, names, connections);
-	if (debug) {
-		puts("COMPETING:::");
-		print_vector(to_return);
-	}
 	to_return = choose_competing_elements(to_return, tags, names, connections);
 	to_return = translate_somethings(to_return, tags);
 	to_return = process_tough_move_drs(to_return, tags, names);
 	to_return = process_able_move_drs(to_return, tags, names);
-	if (debug) {
-		cout << "CORRECTOR::" << endl;
-	}
 	to_return = corrector(to_return, tags, names, connections, is_question);
-	if (debug) {
-		cout << "AFTER_CORRECTOR::" << endl;
-		print_vector(to_return);
-	}
 	to_return = choose_competing_elements(to_return, tags, names, connections);
-	if (debug) {
-		print_vector(to_return);
-		cout << "MIRROR::" << endl;
-	}
 	to_return = delete_mirror_elements(to_return, tags, names, connections);
 	to_return = change_money_symbols(to_return, tags, names);
 	DrtVect originals = restore_originals(to_return, tags, names); // Before deleting elements
 
 	to_return = break_composed_nouns(to_return);
 	to_return = join_composed_nouns(to_return);
-	if (debug) {
-		puts("PRESUPP_GENITIVE:::");
-		print_vector(to_return);
-	}
 	if (!is_question) // an additional genitive does not couple with sentences in question space
 		to_return = add_presupposition_elements(to_return, tags, names);
-	if (debug) {
-		puts("PRESUPP_GENITIVE2:::");
-		print_vector(to_return);
-	}
 	to_return = invert_genitive_for_CD(to_return, tags, names);
 	to_return = invert_genitive_for_quantifiers(to_return, tags, names);
 	to_return = RNR_for_adverbs(to_return, tags, names, is_question);
@@ -9662,10 +9244,6 @@ boost::tuple<DrtVect, DrtVect, DrtPred> drt_builder::get_drt_form()
 	DrtPred error;
 	phrase_->set_likeliness(compute_likeliness(to_return, tags, phrase_->getInfo()->getSense(), &error, is_question));
 
-	if (debug||measure_time) {
-		clock_t end = clock();
-		cout << "Mtime_sense::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 
 
 	if (is_question) {
@@ -9677,10 +9255,6 @@ boost::tuple<DrtVect, DrtVect, DrtPred> drt_builder::get_drt_form()
 	to_return = set_all_anaphora_levels(to_return);
 	to_return = delete_irrelevant(to_return);
 
-	if (debug) {
-		cout << ">>>>" << endl;
-		print_vector(to_return);
-	}
 
 	return boost::make_tuple(to_return, originals, error);
 

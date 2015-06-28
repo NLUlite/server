@@ -502,9 +502,6 @@ PredTree name_subordinates(PredTree pt)
 			pi->str = "SBAR-IF";
 		}
 		if ( (pi->str == "SBAR" || pi->str == "S") && pi.firstChild()->str == "PP") {
-			if (debug) {
-				puts("PP_SBAR:::");
-			}
 			pi->str = "SBAR-PP";
 		}
 		if (pi->str == "SBAR" && pi.firstChild().firstChild() != pt.end() && pi.firstChild().firstChild()->str == "PP") {
@@ -658,9 +655,6 @@ PredTree move_period_out(const PredTree &pt)
 		last_iter = piter; // go to the last element
 
 	if (last_iter != pt.end() && last_iter->str == "-period-") {
-		if(debug) {
-			cout << "PERIOD::: " << endl;
-		}
 		to_return.erase(last_iter);
 		to_return.appendTree(to_return.begin(), Predicate("-period-(-period-)").pred());
 	}
@@ -683,9 +677,6 @@ FuzzyPred post_process_sbar(const Predicate &pred)
 {
 	PredTree pt(pred.pred());
 
-	if (debug) {
-		cout << "SBAR-PP0::: " << Predicate(pt) << endl;
-	}
 	pt = move_period_out(pt);
 	pt = name_subordinates(pt);
 	PredTree orig_pt(pt);
@@ -712,9 +703,6 @@ FuzzyPred post_process_sbar(const Predicate &pred)
 	int depth_tag = 0, depth_old = 0;
 	int safe = 0;
 	string curr_foot; // The foot in the parsed tree right down the element "pi"
-	if (debug) {
-		cout << "SBAR-PP::: " << Predicate(pt) << endl;
-	}
 	for (; pi != pt.end() && safe < 100; ++pi, ++safe) { // corrects PP stray elements
 
 		PredTree::iterator to_the_foot(pi);
@@ -840,9 +828,6 @@ FuzzyPred post_process_sbar(const Predicate &pred)
 		depth_old = depth_tag;
 	}
 
-	if (debug) {
-		cout << "SBAR-PP2::: " << Predicate(pt) << endl;
-	}
 
 	new_feet = get_feet(pt);
 	if (new_feet != orig_feet) // check that the order of the feet is the same as the one before the corrections
@@ -1093,9 +1078,6 @@ FuzzyPred post_process_sbar(const Predicate &pred)
 		depth_old = depth_tag;
 	}
 
-	if (debug) {
-		cout << "PRN-WP::: " << Predicate(pt) << endl;
-	}
 
 	new_feet = get_feet(pt);
 	if (new_feet != orig_feet) // check that the order of the feet is the same as the one before the corrections
@@ -1157,9 +1139,6 @@ FuzzyPred post_process_sbar(const Predicate &pred)
 		depth_old = depth_tag;
 	}
 
-	if (debug) {
-		cout << "PRN-WP2::: " << Predicate(pt) << endl;
-	}
 
 	new_feet = get_feet(pt);
 	if (new_feet != orig_feet) // check that the order of the feet is the same as the one before the corrections
@@ -1393,9 +1372,6 @@ FuzzyPred post_process_sbar(const Predicate &pred)
 
 		int depth_trigger = depth_tag + 3;
 
-		if(debug) {
-			cout << "SBAR_-comma-:::" << str_tag << endl;
-		}
 
 		if (depth_trigger < depth_old && last_hook != pt.end() ) {
 			if (str_tag == "-comma-" && pi.parent()->str != "NP" ) {
@@ -1431,9 +1407,6 @@ FuzzyPred post_process_sbar(const Predicate &pred)
 
 	pt = clean_subordinates(pt);
 
-	if (debug) {
-		cout << "SBAR-PP3::: " << Predicate(pt) << endl;
-	}
 
 	return pt;
 }
@@ -1499,18 +1472,11 @@ FuzzyPred apply_corrections_questions(FuzzyPred pred)
 	vector<pair<FuzzyPred, FuzzyPred> >::iterator cend = candidates.end();
 	for(int ncycle=0; ncycle < 2; ++ncycle) { // apply all the rules twice
 		for (; citer != cend; ++citer) {
-			if (debug) {
-				cout << pred << endl;
-				cout << citer->first << endl;
-			}
 			Upg upg;
 			//if(citer->first.unify(pred, &upg)) {
 			if (pred.unify(citer->first, &upg)) {
 				pred = citer->second;
 				pred / upg;
-				if (debug) {
-					cout << upg << endl;
-				}
 				break;
 			}
 		}
@@ -1532,9 +1498,6 @@ FuzzyPred apply_corrections(FuzzyPred pred, const vector<Clause> &sub_candidates
 	for (; citer != cend; ++citer) {
 		Upg upg;
 		if (pred.unify(citer->first, &upg)) {
-			if (debug) {
-				cout << "CORRECTIONS::: " << citer->second << endl;
-			}
 			pred = citer->second;
 			pred / upg;
 			break;
@@ -1551,46 +1514,19 @@ FuzzyPred apply_corrections(FuzzyPred pred, const vector<Clause> &sub_candidates
 	for (; citer2 != cend2; ++citer2) {
 		PredTree from_pred(citer2->getHypothesis().at(0).pred() );
 		PredTree to_pred(citer2->getConsequence().pred() );
-		if (debug) {
-			cout << "CORR:: " << Predicate(tree) << endl;
-			cout << Predicate(to_pred) << " :- " << Predicate(from_pred) << endl;
-		}
 		PredTree::iterator pi = tree.begin();
 		int safe = 0;
 		for (; pi != tree.end() && safe < safe_max; ++pi, ++safe) {
 			FuzzyPred tmp_pred(pi);
 			Upg upg;
 			bool has_unified = tmp_pred.unify(from_pred, &upg);
-			if (debug) {
-				cout << tmp_pred << endl;
-				cout << Predicate(from_pred) << endl;
-				cout << "UPG::: " << upg << " " << has_unified << endl;
-			}
 			if (!has_unified) {
 				continue;
 			}
-			if (debug) {
-				cout << "CORR2001:: " << Predicate(pred) << endl;
-			}
 			to_pred / upg;
-			if (debug) {
-				cout << "CORR2002:: " << Predicate(pred) << endl;
-			}
-			if (debug) {
-				cout << "CORR201:: " << Predicate(pred) << endl;
-			}
 			pi = tree.replace(to_pred, pi);
-			if (debug) {
-				cout << "CORR202:: " << Predicate(pred) << endl;
-			}
-		}
-		if (debug) {
-			cout << "CORR21:: " << Predicate(pred) << endl;
 		}
 		vector<string> new_feet = get_feet(tree);
-		if (debug) {
-			cout << "CORR22:: " << Predicate(pred) << endl;
-		}
 		if (new_feet != orig_feet) // check that the order of the feet is the same as the one before the corrections
 			tree = orig_pt;
 		else
@@ -1598,9 +1534,6 @@ FuzzyPred apply_corrections(FuzzyPred pred, const vector<Clause> &sub_candidates
 	}
 	pred.pred() = tree;
 
-	if (debug) {
-		cout << "CORR3:: " << Predicate(pred) << endl;
-	}
 
 	return pred;
 }
@@ -1821,15 +1754,9 @@ FuzzyPred post_process(const Predicate &pred)
 {
 	PredTree pt(pred.pred());
 
-	if(debug) {
-		cout << "POST_PROC::: " << pred << endl;
-	}
 
 	pt = move_period_out(pt);
 	pt = correct_tree(pt);
-	if(debug) {
-		cout << "POST_PROC2::: " << Predicate(pt) << endl;
-	}
 
 	PredTree orig_pt(pt);
 	vector<string> orig_feet = get_feet(pt);
@@ -1999,37 +1926,17 @@ FuzzyPred post_process(const Predicate &pred)
 			height_trigger = height_tag + 2;
 		}
 
-          if(debug) {
-               cout << "DEPTH_TR::: " << depth_trigger << ", " << depth_old
-               	<< ", " << height_trigger << ", " << height_old
-                    << ", " << curr_foot
-                    << ", " << str_tag
-                    << ", " << (pi.firstChild() != pt.end() ? pi.firstChild()->str : "END")
-                    << ", " << (pi.firstChild() != pt.end() ? pi.num_children() : -1)
-                    << ", " << (last_hook != pt.end() ? "VALID" : "NOT VALID")
-                    << endl;
-          }
 
 		if ( (depth_trigger < depth_old
 			  || (curr_foot == "of" && depth_trigger == depth_old && height_trigger > height_old) )
 				&& last_hook != pt.end()) {
-			if(debug) {
-				cout << "DEPTH_TR2::: " << endl;
-			}
 			if ((pi.num_children() > 1 && (str_tag == "PP" || str_tag == "WHPP")) // the num_children() >1 is due to final PP(IN) in questions
 			|| (curr_foot == "of" && (str_tag == "NP" || str_tag == "IN"))) {
-				if(debug) {
-					cout << "DEPTH_TR3::: " << endl;
-				}
 				is_the_article = false;
 				if (pi.lastChild()->str != "-period-") {
 					PredTree tmp_tree(pi);
 					pt.erase(pi);
 					pi = pt.appendTree(last_hook, tmp_tree);
-					if(debug) {
-						cout << "PT1::: " << Predicate(pt) << endl;
-						cout << "PT11::: " << Predicate(last_hook) << endl;
-					}
 					pi = last_hook;
 //					pi = pt.begin();
 //					++pi;
@@ -2037,9 +1944,6 @@ FuzzyPred post_process(const Predicate &pred)
 
 					continue;
 				} else {
-					if (debug) {
-						puts("OF:::");
-					}
 					PredTree tmp_tree(pi);
 					tmp_tree.erase(tmp_tree.begin().lastChild());
 					PredTree period_tree(pi.lastChild());
@@ -2087,9 +1991,6 @@ FuzzyPred post_process(const Predicate &pred)
 	}
 
 
-	if(debug) {
-		cout << "PT::: " << Predicate(pt) << endl;
-	}
 
 	new_feet = get_feet(pt);
 	if (new_feet != orig_feet) // check that the order of the feet is the same as the one before the corrections
@@ -2148,9 +2049,6 @@ FuzzyPred post_process(const Predicate &pred)
 	else
 		orig_pt = pt;
 
-	if(debug) {
-		cout << "AFTER_POST_PROC::: " << Predicate(pt) << endl;
-	}
 
 	return FuzzyPred(pt);
 }
@@ -2260,13 +2158,6 @@ bool is_opening_nested(vector<FuzzyPred>::iterator ipred, vector<FuzzyPred> &dat
 	vector<FuzzyPred>::iterator iorig(ipred);
 	string pred_str = extract_header(*ipred);
 
-	if(debug && ipred != data.begin() && boost::next(ipred) != data.end()) {
-		cout << "AND_IN:::"
-			<< " " << pred_str
-			<< " " << boost::prior(ipred)->pred().begin()->str
-			<< " " << boost::next(ipred)->pred().begin()->str
-			<< endl;
-	}
 
 
 	if (pred_str == "IN" && ipred != data.begin()
@@ -2275,9 +2166,6 @@ bool is_opening_nested(vector<FuzzyPred>::iterator ipred, vector<FuzzyPred> &dat
 		&& boost::next(ipred)->pred().begin()->str == "PRP"
 		//&& boost::next(ipred)->pred().begin().firstChild()->str == "they"
 	) {
-		if(debug) {
-			cout << "AND_IN:::" << endl;
-		}
 		return true;
 	}
 
@@ -2349,9 +2237,6 @@ bool is_opening_nested(vector<FuzzyPred>::iterator ipred, vector<FuzzyPred> &dat
 			++ipred;
 		}
 	}
-	if (debug) {
-		cout << "WHILE_OPENING:::" << *iorig << endl;
-	}
 
 	ipred = iorig;
 	if (pred_str == "IN" && *ipred == FuzzyPred("IN(for)") && ipred != data.begin()
@@ -2409,12 +2294,6 @@ bool is_opening_nested(vector<FuzzyPred>::iterator ipred, vector<FuzzyPred> &dat
 			|| (pred_str == "VBG" && ipred != data.begin() && boost::prior(ipred)->pred().begin()->str == "RB")
 			|| (pred_str == "VBG" && ipred == data.begin()) // wearing a mask is illegal
 			) {
-		if (debug) {
-			if (ipred != data.begin())
-				cout << "VBG:: " << *ipred << ", " << boost::prior(ipred)->pred().begin()->str << endl;
-			else
-				cout << "VBG:: " << *ipred << ", " << extract_header(*ipred) << endl;
-		}
 		while (ipred != data.end()) {
 			++ipred;
 			if (ipred == data.end())
@@ -2426,9 +2305,6 @@ bool is_opening_nested(vector<FuzzyPred>::iterator ipred, vector<FuzzyPred> &dat
 				next_str = boost::next(ipred)->pred().begin()->str;
 			if (boost::next(ipred) != data.end() && boost::next(boost::next(ipred)) != data.end())
 				next_next_str = boost::next(boost::next(ipred))->pred().begin()->str;
-			if (debug) {
-				cout << "VBG3::" << head_str << " " << next_str << " " << next_next_str << endl;
-			}
 			if (head_str == "V"
 					|| (head_str == "VB" && pred_str == "WDT") // that be
 					|| (head_str == "MD" && next_str == "VB")

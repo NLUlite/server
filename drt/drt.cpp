@@ -85,17 +85,10 @@ void QuestionList::add(const vector<DrtPred> &drtvect)
 	vector<DrtPred>::const_iterator dend = drtvect.end();
 
 	for (; diter != dend; ++diter) {
-		if (debug) {
-			cout << "QQUESTION0::: " << extract_header(*diter) << endl;
-		}
 		if (diter->is_question()) {
 			DrtPred tmp_pred(*diter);
 			implant_header(tmp_pred, diter->get_question_word());
 			tmp_pred.name() = diter->get_question_word();
-			if (debug) {
-				cout << "QQUESTION::: " << extract_header(*diter) << endl;
-				cout << "QQUESTION2::: " << diter->get_question_word() << endl;
-			}
 			this->add(tmp_pred);
 		} else if (diter->is_name()) {
 			string header = extract_header(*diter);
@@ -107,9 +100,6 @@ void QuestionList::add(const vector<DrtPred> &drtvect)
 					priors_.addNoun(strs.at(n));
 			}
 
-			if (debug) {
-				cout << "QPRIOR::: " << extract_header(*diter) << endl;
-			}
 		}
 	}
 }
@@ -190,9 +180,6 @@ vector<DrtPred> drt::predicates_with_references() const
 		string from_str = references_.at(r).second;
 		string to_str = references_.at(r).first;
 
-		if (debug) {
-			cout << "PREDS_WITH_REFS::: " << from_str << " " << to_str << endl;
-		}
 
 		for (int n = 0; n < predicates.size(); ++n) {
 			vector<string> children = predicates.at(n).extract_children();
@@ -200,9 +187,6 @@ vector<DrtPred> drt::predicates_with_references() const
 			bool make_substitution = true;
 			// if a substitution gives two identical children, the substitution is not made
 			for (int m = 0; m < children.size(); ++m) {
-				if (debug) {
-					cout << "PREDS_WITH_REFS2::: " << children.at(m) << endl;
-				}
 				if (children.at(m) == to_str) {
 					make_substitution = false;
 					break;

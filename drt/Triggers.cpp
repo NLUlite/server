@@ -60,13 +60,7 @@ static vector<vector<FuzzyPred> > get_new_tags(const DrtVect &drtvect, const vec
 	}
 
 	clock_t start;
-	if (debug) {
-		start = clock();
-	}
 
-	if (debug) {
-		cout << "TAGS::: " << error << endl;
-	}
 
 	CodePred get_candidate_verbs("join(set(taglist,_B),"
 			"     set(taglist-VBZ,_B),"
@@ -973,10 +967,6 @@ static vector<vector<FuzzyPred> > get_new_tags(const DrtVect &drtvect, const vec
 	Engine engine(&k);
 	CodePred result = engine.run(get_candidate_verbs);
 
-	if (debug) {
-		clock_t end = clock();
-		cout << "Mtime23::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 
 	vector<FuzzyPred> predlist;
 	predlist = engine.getList<FuzzyPred>("taglist");
@@ -1073,16 +1063,6 @@ static vector<vector<FuzzyPred> > get_new_tags(const DrtVect &drtvect, const vec
 	if (!(predlist.size() && predlist.at(0) == Predicate("false")))
 		to_return.push_back(predlist);
 
-	if (debug) {
-		std::stringstream ss;
-		engine >> ss;
-		cout << "RESULT_VBZ::: " << ss.str() << endl;
-		DrtVect dtmp = drtvect;
-		print_vector(dtmp);
-		puts("list_vbz2:::");
-		if (to_return.size())
-			print_vector(to_return.back());
-	}
 
 	return to_return;
 }
@@ -1188,16 +1168,9 @@ static vector<int> deny_PRN_positions(const DrtVect &drtvect, const vector<Fuzzy
 	Engine engine(&k);
 
 	clock_t start;
-	if (debug) {
-		start = clock();
-	}
 
 	CodePred result = engine.run(get_candidate_verbs);
 
-	if (debug) {
-		clock_t end = clock();
-		cout << "Mtime231::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 
 
 	vector<int> noprn;
@@ -1205,12 +1178,6 @@ static vector<int> deny_PRN_positions(const DrtVect &drtvect, const vector<Fuzzy
 	if (!(noprn.size() && noprn.at(0) == -1))
 		to_return = noprn;
 
-	if (debug) {
-		stringstream ss;
-		engine >> ss;
-		cout << "RESULTS_PRN::: " << ss.str() << endl;
-		print_vector(to_return);
-	}
 
 	return to_return;
 }
@@ -1319,27 +1286,15 @@ static vector<int> deny_SBAR_positions(const DrtVect &drtvect, const vector<Fuzz
 	Engine engine(&k);
 
 	clock_t start;
-	if (debug) {
-		start = clock();
-	}
 
 	CodePred result = engine.run(get_candidate_verbs);
 
-	if (debug) {
-		clock_t end = clock();
-		cout << "Mtime232::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 
 	vector<int> nosbar;
 	nosbar = engine.getList<int>("positions");
 	if (!(nosbar.size() && nosbar.at(0) == -1))
 		to_return = nosbar;
 
-	if (debug) {
-		stringstream ss;
-		engine >> ss;
-		cout << "RESULTS_SBAR::: " << ss.str() << endl;
-	}
 
 	return to_return;
 }
@@ -1438,16 +1393,9 @@ static FuzzyPred correct_parsed_tree(const DrtVect &drtvect, const vector<FuzzyP
 	Engine engine(&k);
 	clock_t start;
 
-	if (debug) {
-		start = clock();
-	}
 
 	CodePred result = engine.run(get_candidate_verbs);
 
-	if (debug) {
-		clock_t end = clock();
-		cout << "Mtime233::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 
 	FuzzyPred fp;
 	fp = engine.getElement<FuzzyPred>("new-tree");
@@ -1468,11 +1416,6 @@ static FuzzyPred correct_parsed_tree(const DrtVect &drtvect, const vector<FuzzyP
 		to_return = fp;
 	}
 
-	if (debug) {
-		stringstream ss;
-		engine >> ss;
-		cout << "RESULTS_CORRECT_TREE::: " << ss.str() << endl;
-	}
 
 	return to_return;
 }

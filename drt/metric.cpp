@@ -824,11 +824,6 @@ vector<string> metric::get_hypernyms_of_adjective(const string &s1, int max_sep)
 	for (int n = 0; n < all_syns.size(); ++n) {
 		vector<string> syn_str = get_map_element(adj_strings_map, all_syns.at(n));
 		to_return.insert(to_return.end(), syn_str.begin(), syn_str.end());
-		if(debug) {
-			for(int m=0; m < syn_str.size(); ++m) {
-				cout << "SYN_ADJ::: " << syn_str.at(m) << endl;
-			}
-		}
 	}
 
 	return to_return;
@@ -867,11 +862,6 @@ vector<string> metric::get_hyponyms_of_adjective(const string &s1, int max_sep)
 	for (int n = 0; n < all_syns.size(); ++n) {
 		vector<string> syn_str = get_map_element(adj_strings_map, all_syns.at(n));
 		to_return.insert(to_return.end(), syn_str.begin(), syn_str.end());
-		if(debug) {
-			for(int m=0; m < syn_str.size(); ++m) {
-				cout << "SYN_ADJ::: " << syn_str.at(m) << endl;
-			}
-		}
 	}
 
 	return to_return;
@@ -911,10 +901,6 @@ vector<string> metric::get_hypernyms_of_noun(const string &s1, int max_sep)
 		vector<string> syn_str = get_map_element(synsets_strings, all_syns.at(n));
 		to_return.insert(to_return.end(), syn_str.begin(), syn_str.end());
 
-		if(debug) {
-			cout << "SYNSETS:: " << endl;
-			print_vector(syn_str);
-		}
 	}
 	return to_return;
 }
@@ -937,10 +923,6 @@ vector<string> metric::get_synonyms_of_noun(const string &s1)
 		for (int n = 0; n < all_syns.size(); ++n) {
 			vector<string> syn_str = get_map_element(synsets_strings, all_syns.at(n));
 			to_return.insert(to_return.end(), syn_str.begin(), syn_str.end());
-			if(debug) {
-				cout << "SYNONYM:: " << endl;
-				print_vector(syn_str);
-			}
 		}
 	}
 	return to_return;
@@ -980,10 +962,6 @@ vector<string> metric::get_hyponyms_of_noun(const string &s1, int max_sep)
 		vector<string> syn_str = get_map_element(synsets_strings, all_syns.at(n));
 		to_return.insert(to_return.end(), syn_str.begin(), syn_str.end());
 
-		if(debug) {
-			cout << "SYNSETS:: " << endl;
-			print_vector(syn_str);
-		}
 	}
 	return to_return;
 }
@@ -1263,9 +1241,6 @@ double metric::distance(const string &a, const string &b)
 	ic1 = log(f1);
 	ic2 = log(f2);
 
-	if(debug) {
-		cout << "DISTANCE::: " << ic1 << " " << ic2 << " " << f1 << " " << f2 << endl;
-	}
 
 	if(ic1 == 0 && ic2 == 0)
 		return 1;
@@ -1534,15 +1509,8 @@ vector<int> metric::adv_lexnames(const string &adv)
 		return vector<int>(); // No adjective name found
 	vector<int> mint = miter->second;
 	for (int n = 0; n < mint.size(); ++n) {
-		if (debug) {
-			cout << "PERTAY2::: " << mint.at(n) << endl;
-		}
 		MapIntInt::iterator lexnames_iter = adv_pertainym_map.find(mint.at(n));
 		if (lexnames_iter != adv_pertainym_map.end()) { // and adjective can pertain to a name (woody -> wood)
-			if (debug) {
-				puts("MINT:::");
-				print_vector(mint);
-			}
 			vector<int> lexnames = lexnames_iter->second;
 			to_return.insert(to_return.end(), lexnames.begin(), lexnames.end());
 		}
@@ -1635,10 +1603,6 @@ vector<string> metric::get_reverse_pertainyms(const string &adj)
 vector<string> metric::get_adv_pertainyms(const string &adv)
 {
 	vector<int> lexnames = this->adv_lexnames(adv);
-	if (debug) {
-		puts("MINT2:::");
-		print_vector(lexnames);
-	}
 	vector<string> to_return;
 	for (int n = 0; n < lexnames.size(); ++n) {
 		MapIntString::iterator striter = adj_strings_map.find(lexnames.at(n));

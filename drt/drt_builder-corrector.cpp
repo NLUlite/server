@@ -139,24 +139,12 @@ vector<DrtPred> corrector(const vector<DrtPred> &pre_drt, vector<string> &tags, 
 		tag1 = to_return.at(pos1).tag();
 		tag2 = to_return.at(pos2).tag();
 
-		if(debug) {
-			cout << "CONJ::: " << tag1 << " " << tag2 << endl;
-		}
 
 		if( tag1 == "IN" && pos1 == unreferenced_pos
 		    && tag2 == "-comma-") {
-			if(debug) {
-				cout << "CONJ0::: " << to_return.at(pos1) << " " << to_return.at(pos2) << endl;
-			}
 			if( has_first_tag(to_return.at(pos1)) )
 				continue;
-			if(debug) {
-				cout << "CONJ1::: " << to_return.at(pos1) << " " << to_return.at(pos2) << endl;
-			}
 			string sref2 = extract_second_tag(to_return.at(pos2));
-			if(debug) {
-				cout << "CONJ2::: " << sref2 << endl;
-			}
 			if( ref_is_verb(sref2) && unreferenced_compl_pos != -1) {
 				implant_first(to_return.at(unreferenced_compl_pos),sref2);
 			}
@@ -283,9 +271,6 @@ vector<DrtPred> corrector(const vector<DrtPred> &pre_drt, vector<string> &tags, 
 		}
 	}
 
-	if (debug) {
-		print_vector (to_return);
-	}
 	// !person|animal|.... associated with a name is deleted
 	for (int n = 0; n < to_return.size(); ++n) {
 		string head = extract_header(to_return.at(n));
@@ -297,9 +282,6 @@ vector<DrtPred> corrector(const vector<DrtPred> &pre_drt, vector<string> &tags, 
 				to_return.at(n).name() += ":DELETE";
 			}
 		}
-	}
-	if (debug) {
-		print_vector (to_return);
 	}
 	// verb(A,B,none) @DATIVE(A,C) name(C) -> verb(A,B,C) name(C)
 	// it also corrects verb(A,B,C) @DATIVE(A,C) name(C) -> verb(A,B,C) name(C)
@@ -318,9 +300,6 @@ vector<DrtPred> corrector(const vector<DrtPred> &pre_drt, vector<string> &tags, 
 				}
 			}
 		}
-	}
-	if (debug) {
-		print_vector (to_return);
 	}
 	// @GENITIVE(A,B) NAME(A) VERB(C,D,...) -> @GENITIVE(C,A) NAME(A) VERB(C,D,...)
 	for (int n = 0; is_question && n < to_return.size(); ++n) {
@@ -341,9 +320,6 @@ vector<DrtPred> corrector(const vector<DrtPred> &pre_drt, vector<string> &tags, 
 				switch_children(to_return.at(n));
 			}
 		}
-	}
-	if (debug) {
-		print_vector (to_return);
 	}
 
 	// verb1(A,B,C) @SUB-OBJ(A,D) verb2(D,E,none) -> verb1(A,B,C) verb2(D,E,C)
@@ -403,10 +379,6 @@ vector<DrtPred> corrector(const vector<DrtPred> &pre_drt, vector<string> &tags, 
 		}
 	}
 
-	if (debug) {
-		puts("NEW_SUBJ::: ");
-		print_vector (to_return);
-	}
 
 	// Subordinate verbs with no subjects borrow the subject from the parent verb
 	for (int n = 0; n < to_return.size(); ++n) {
@@ -562,10 +534,6 @@ vector<DrtPred> corrector(const vector<DrtPred> &pre_drt, vector<string> &tags, 
 			}
 		}
 	}
-	if (debug) {
-		puts("CONJ0:::");
-		print_vector (to_return);
-	}
 	// passive verbs joined by a conjunction share agent and patient
 	for (int n = 0; n < to_return.size(); ++n) {
 		string fref = extract_first_tag(to_return.at(n));
@@ -594,10 +562,6 @@ vector<DrtPred> corrector(const vector<DrtPred> &pre_drt, vector<string> &tags, 
 		}
 	}
 
-	if (debug) {
-		puts("CONJ:::");
-		print_vector (to_return);
-	}
 	// If a the verb "to be" has object but no subject switch subj and obj
 	for (int n = 0; n < to_return.size(); ++n) {
 		string fref = extract_first_tag(to_return.at(n));
@@ -725,9 +689,6 @@ vector<DrtPred> corrector(const vector<DrtPred> &pre_drt, vector<string> &tags, 
 		head = head.substr(0, head.find(":"));
 		if (to_return.at(n).is_verb() && head == "do" && !to_return.at(n).is_question() && !has_object(to_return.at(n))) {
 			string new_ref = get_first_ref_with_tag(to_return, "WP");
-			if (debug) {
-				cout << "NEW_REF::: " << new_ref << endl;
-			}
 			if (new_ref == "")
 				continue;
 			// "what are the snakes able to do"
@@ -757,9 +718,6 @@ vector<DrtPred> corrector(const vector<DrtPred> &pre_drt, vector<string> &tags, 
 			int cref = find_complement_with_target(to_return,fref);
 			if( cref != -1 && !to_return.at(cref).is_delete())
 				continue;
-			if (debug) {
-				cout << "WP_REF::: " << fref << endl;
-			}
 			// find the first verb with either no subject or no object
 			for (int m = 0; m < to_return.size(); ++m) {
 				if (to_return.at(m).is_verb()) {
@@ -858,26 +816,16 @@ vector<DrtPred> corrector(const vector<DrtPred> &pre_drt, vector<string> &tags, 
 				int sverb = find_verb_with_string(to_return, sref);
 				if (fverb == -1 || sverb == -1)
 					continue;
-				if (debug) {
-					puts("PAR:::::");
-				}
 				if (has_subject(to_return.at(fverb)) && !has_subject(to_return.at(sverb))
 //                       && !is_passive(to_return.at(fverb))
 //                       && !is_passive(to_return.at(sverb))
 						) {
-					if (debug) {
-						puts("PAR2:::::");
-					}
 					implant_subject(to_return.at(sverb), extract_subject(to_return.at(fverb)));
 				}
 			}
 		}
 	}
 
-	if (debug) {
-		puts("CORRECTOR2:::");
-		print_vector (to_return);
-	}
 
 	// A verb connected to a verb should inherit a subject or an object
 	// only if it is not already connected with a preposition
@@ -901,9 +849,6 @@ vector<DrtPred> corrector(const vector<DrtPred> &pre_drt, vector<string> &tags, 
 			if (h1.find("PASSIVE") != string::npos)
 				continue;
 
-			if (debug) {
-				cout << "VERBS_CONN:::" << to_return.at(pos1) << " " << to_return.at(pos2) << " " << m << endl;
-			}
 			if (m == -1)
 				continue;
 
@@ -922,9 +867,6 @@ vector<DrtPred> corrector(const vector<DrtPred> &pre_drt, vector<string> &tags, 
 			mconj = find_all_compl_with_first_tag(to_return, tags, fref2);
 			bool has_dative = false;
 			for (int k = 0; k < mconj.size(); ++k) {
-				if (debug) {
-					cout << "DATIVE_SEARCHING:: " << fref2 << " " << to_return.at(mconj.at(k)) << endl;
-				}
 				string fref_tmp = extract_first_tag(to_return.at(mconj.at(k)));
 				string header = extract_header(to_return.at(mconj.at(k)));
 				if (fref_tmp == fref2 && header == "@SUBORD")
@@ -952,10 +894,6 @@ vector<DrtPred> corrector(const vector<DrtPred> &pre_drt, vector<string> &tags, 
 		}
 	}
 
-	if (debug) {
-		puts("CORRECTOR3:::");
-		print_vector (to_return);
-	}
 
 	// A verb gets the subject from the AUX if the verb does not have hone
 	for (int n = 0; n < connections.size(); ++n) {
@@ -978,9 +916,6 @@ vector<DrtPred> corrector(const vector<DrtPred> &pre_drt, vector<string> &tags, 
 			if (h1.find("PASSIVE") != string::npos)
 				continue;
 
-			if (debug) {
-				cout << "VERBS_CONN2:::" << to_return.at(pos1) << " " << to_return.at(pos2) << " " << m << endl;
-			}
 			if (m == -1)
 				continue;
 
@@ -995,10 +930,6 @@ vector<DrtPred> corrector(const vector<DrtPred> &pre_drt, vector<string> &tags, 
 		}
 	}
 
-	if (debug) {
-		puts("CORRECTOR2:::");
-		print_vector (to_return);
-	}
 
 	// Some complements need to be corrected
 	for (int n = 0; !is_question && n < to_return.size(); ++n) {
@@ -1041,13 +972,6 @@ vector<DrtPred> corrector(const vector<DrtPred> &pre_drt, vector<string> &tags, 
 		string header = extract_header(to_return.at(n));
 		if (to_return.at(n).is_complement()
 		    && (to_return.at(n).tag() == "CC" || to_return.at(n).tag() == "-comma-") ) {
-			if (debug) {
-				cout << "ONLY_ADJ::: "
-					<< fref << " "
-					<< has_only_adjectives(to_return,fref) << " "
-				     << has_adjective(to_return,fref) << " "
-				     << has_verb(to_return,fref) << " " << endl;
-			}
 			if(has_only_adjectives(to_return,fref) && has_adjective(to_return,sref) && !has_verb(to_return,sref) ) {
 				add_header(to_return.at(n), ":DELETE");
 				// implant_first(to_return.at(n),"none");
@@ -1085,16 +1009,9 @@ vector<DrtPred> corrector(const vector<DrtPred> &pre_drt, vector<string> &tags, 
 			add_header(to_return.at(n), ":DELETE");
 		} else
 			prev_compl.push_back(make_pair(header, make_pair(fref, sref)));
-		if (debug) {
-			cout << "PREV_HEADER::: " << header << " " << fref << " " << sref << endl;
-		}
 	}
 
 
-	if (debug) {
-		puts("CORRECTOR4:::");
-		print_vector (to_return);
-	}
 
 	// say that "he is happy": say(verb1,,) @SUBORD(verb1,name1) happy(name1) -> say(verb1,,) @ALLOCUTION(verb1,name1) happy(name1)
 	vector < string > cverbs = get_communication_verbs();
@@ -1137,10 +1054,6 @@ vector<DrtPred> corrector(const vector<DrtPred> &pre_drt, vector<string> &tags, 
 				int m3 = find_complement_with_first_and_second_tag(to_return,vref,sref,"@CONJUNCTION|@DISJUNCTION|@COORDINATION");
 //				int m2 = find_complement_with_first_and_second_tag(to_return,sref,vref);
 //				int m3 = find_complement_with_first_and_second_tag(to_return,vref,sref);
-				if (debug) {
-					puts("CLOSED_LOOP::: ");
-					cout << sref << " " << vref << " " << m2 << " " << m3 << " " << to_return.at(n) << endl;
-				}
 				if(m2 != -1 ) {
 					add_header(to_return.at(m2),":DELETE");
 				}
@@ -1169,16 +1082,10 @@ vector<DrtPred> corrector(const vector<DrtPred> &pre_drt, vector<string> &tags, 
 	for (int n = 0; n < to_return.size(); ++n) {
 		string header = extract_header(to_return.at(n));
 		string sref   = extract_second_tag(to_return.at(n));
-		if(debug) {
-			cout << "SUBORD_SWITCH::: " << header << "" << sref << endl;
-		}
 		if (header == "@SUBORD" && ref_is_verb(sref) ) {
 			string fref = extract_first_tag(to_return.at(n));
 			int m = find_complement_with_target(to_return,fref);
 			int mverb = find_verb_with_string(to_return,sref);
-			if(debug) {
-				cout << "SUBORD_SWITCH1::: " << fref << endl;
-			}
 
 			if(m != -1 && mverb == -1) {
 				string header2 = extract_header(to_return.at(m));

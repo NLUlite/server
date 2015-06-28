@@ -137,10 +137,6 @@ static bool contained_NNP(const string &lhs, const string &rhs)
 static double get_string_vector_distance(metric *d, const string head_str, const vector<string> ref_strs)
 /// This function should just be in Match.cpp
 {
-	if(debug) {
-		cout << "STRING_VECTOR0::: " << head_str ;
-		print_vector(ref_strs);
-	}
 
 	vector<string> head_strs;
 	boost::split(head_strs, head_str, boost::is_any_of("|"));
@@ -154,9 +150,6 @@ static double get_string_vector_distance(metric *d, const string head_str, const
 	bool invert = false;
 	for (; liter != lend; ++liter) {
 		for (riter = ref_strs.begin(); riter != rend; ++riter) {
-			if(debug) {
-				cout << "STRING_VECTOR::: " << *liter << " " << *riter << endl;
-			}
 			if (*liter == "[*]" || *riter == "[*]")
 				return 1;
 			if (*liter == *riter) {
@@ -390,9 +383,6 @@ static bool pred_is_singular(vector<DrtPred> speech, DrtPred pred)
 				string lemma = tagg->get_info()->get_conj(header, "NNS");
 				if (lemma == "")
 					lemma = header;
-				if (debug) {
-					cout << "VSING::: " << fref << " " << header << " " << speech.at(n).is_plural() << " " << d->has_synset(lemma) << " " << lemma << endl;
-				}
 				if (fref == subj_ref && (d->has_synset(lemma) || is_generic(header)) && speech.at(n).is_plural()) {
 					return false;
 				}
@@ -456,12 +446,6 @@ static bool specifications_are_compatible(const DrtVect &pred, const DrtVect &pr
 
 	string q1= find_quantity(pred, ref);
 	string q2= find_quantity(pred_from, ref_from);
-	if(debug) {
-		cout << "SPECS_COMP:::" << ref << " " << ref_from << " " << q1 << " " << q2 << endl;
-		print_vector(pred);
-		print_vector(pred_from);
-		puts("END_COMP:::");
-	}
 	if (q1 == q2)
 		return true;
 	return false;
@@ -545,14 +529,6 @@ vector<pair<string, string> > Anaphora::getInstantiationWithPreds(const drt &drt
 							already_assigned.at(m) = pred_child_str;
 							ret_inst.at(m) = make_pair(child_str, pred_child_str); // child_str is the new ref that overwrites pred_child_str
 						}
-						if (debug) {
-							cout << "+---/> " << head_str << " " << pred_head_str << " " << dist << " " << likeliness << " " << likelinesses.at(m) << endl;
-							cout << "+---/2> " << d->gender_proper_name(head_str) << " " << d->gender_proper_name(pred_head_str) << endl;
-							cout << "+---/3> " << predicates.at(n).tag() << " " << pred_head_str << " " << dist << endl;
-							cout << "----/> " << anaphora_level << " " << predicates.at(n).anaphoraLevel() << endl;
-							print_vector(ref_str);
-							// print_vector(already_assigned);
-						}
 					}
 				}
 			}
@@ -583,10 +559,6 @@ vector<References> Anaphora::getReferences()
 		//print_vector(tmp_drt);
 		// Find the references
 		vector<DrtPred> tmp_refs = drtiter->get_references_with_preds();
-		if(debug) {
-			cout << "REFS:: " << endl;
-			print_vector(tmp_refs);
-		}
 		references.push_back(tmp_refs);
 	}
 
@@ -619,10 +591,6 @@ vector<References> Anaphora::getReferences()
 			phrase_from_old = phrase_from;
 		}
 		vector<pair<string, string> > tmp_inst = this->getInstantiationWithPreds(tmp_drt_to, tmp_drt_from, ref, likelinesses);
-		if (debug) {
-			puts("PAIRSS:::");
-			print_pair_vector(tmp_inst);
-		}
 
 		if (tmp_inst.size())
 			phrase_references.at(phrase_from).insert(phrase_references.at(phrase_from).begin(), tmp_inst.begin(),
@@ -653,10 +621,6 @@ static vector<pair<string, string> > get_donkey_instantiation_with_preds(const d
 				pred_head_str = cut_numbers(pred_head_str);
 				vector<string> ref_str = get_reference_string(pred_head_str);
 
-				if (debug) {
-					cout << "DREF_STR::: " << endl;
-					print_vector(ref_str);
-				}
 
 				if (predicates.at(n).is_proper_name() && d->gender_proper_name(head_str) != "") {  ///
 					head_str += "|person";
@@ -672,14 +636,6 @@ static vector<pair<string, string> > get_donkey_instantiation_with_preds(const d
 						already_assigned.at(m) = child_str;
 						ret_inst.at(m) = make_pair(child_str, ref.at(m));
 					}
-					if (debug) {
-						cout << "----/D> " << head_str << " " << pred_head_str << " " << dist << endl;
-						cout << "----/D2> " << d->gender_proper_name(head_str) << " "
-								<< d->gender_proper_name(pred_head_str) << endl;
-						// cout << "----/> " << anaphora_level << " " << predicates.at(n).anaphoraLevel() << endl;
-						print_vector(ref_str);
-						// print_vector(already_assigned);
-					}
 				}
 			}
 		}
@@ -693,9 +649,6 @@ vector<References> Anaphora::getDonkeyReferences()
 {
 	vector<References> phrase_references(drt_collection_.size());
 
-	if (debug) {
-		cout << "DSIZE:: " << drt_collection_.size() << endl;
-	}
 
 	if (drt_collection_.size() == 0)
 		return phrase_references;
@@ -714,10 +667,6 @@ vector<References> Anaphora::getDonkeyReferences()
 		vector<pair<int, int> > tmp_connection = get_related_phrases(n); // find the phrases related to n
 		connected.insert(connected.end(), tmp_connection.begin(), tmp_connection.end());
 
-		if (debug) {
-			puts("CONN:::");
-			print_pair_vector(connected);
-		}
 	}
 
 	vector<pair<string, string> > own_refs;
@@ -761,11 +710,6 @@ static vector<DrtPred> substitute_ref_safe(vector<DrtPred> &pre_drt, const strin
 			}
 		}
 		predicates.at(n).implant_children(children);
-		if(debug) {
-			cout << "SUBST::: ";
-			print_vector(children);
-			print_vector(predicates);
-		}
 	}
 	return predicates;
 }
@@ -785,10 +729,6 @@ static DrtVect define_subject(DrtVect drtvect, References *internal_refs)
 			internal_refs->push_back(make_pair(new_ref,fref) );
 			break; // only the first subject is transformed
 		}
-	}
-	if(debug) {
-		cout << "DEFINE_SUBJ::: ";
-		print_vector(drtvect);
 	}
 	return drtvect;
 }
@@ -886,9 +826,6 @@ string find_first_NNP_ref(const vector<drt> &drt_collection)
 				string header = extract_header(drtvect.at(n));
 				if (d->gender_proper_name(header) != "") {
 					to_return = extract_first_tag(drtvect.at(n));
-					if (debug) {
-						cout << "FIRST_NNP::: " << header << endl;
-					}
 					return to_return;
 				}
 			}
@@ -927,9 +864,6 @@ vector<References> Anaphora::getUninstantiated()
 			string header = extract_header(drtvect.at(m));
 
 			if (tag == "PRP" && (header == "he" || header == "she") && ref_is_ref(fref)) {
-				if (debug) {
-					cout << "PRP::: " << header << " " << fref << endl;
-				}
 				if(first_NNP_ref != "")
 					to_return.at(n).push_back(make_pair(first_NNP_ref, fref));
 			}
@@ -957,9 +891,6 @@ vector<References> Anaphora::getUninstantiated()
 				string NNP_ref = fref_NNP;
 				if (fref != NNP_ref && NNP_ref != "")
 					to_return.at(n).push_back(make_pair(NNP_ref, fref));
-				if (debug) {
-					cout << " -/> " << fref << " " << NNP_ref << endl;
-				}
 			}
 		}
 	}

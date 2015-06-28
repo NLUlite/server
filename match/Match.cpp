@@ -163,11 +163,6 @@ string get_what()
 
 bool MatchElements::hasElement(const string &pred) const
 {
-	if(debug) {
-		cout << "HAS_ELEMENT:::" << pred << " ";
-		set<string> to_print(elements_);
-		print_vector(to_print);
-	}
 
 	set<string>::const_iterator miter= elements_.find(pred);
 	if(miter != elements_.end() )
@@ -303,18 +298,11 @@ bool MatchType::matchDate(const DrtPred &lhs, const DrtPred &rhs)
 	string lhead = extract_header(lhs);
 	string rhead = extract_header(rhs);
 
-	if (debug) {
-		cout << "MML:: " << lhead << endl;
-		cout << "MMR:: " << rhead << endl;
-	}
 
 	try {
 
 		Date ldate(lhead), rdate(rhead);
 
-		if (debug) {
-			cout << this->is_more() << " " << this->is_less() << " " << (ldate < rdate) << " " << (rdate < ldate) << endl;
-		}
 
 		if (this->is_more() && ldate < rdate)
 			return true;
@@ -555,10 +543,6 @@ void MatchGraph::print(std::ostream &out)
 static vector<DrtPred> get_specification_from_pred(const vector<DrtPred> &preds, const DrtPred &pred)
 {
 	vector<DrtPred> to_return = get_elements_next_of(preds, pred);
-	if(debug) {
-		cout << "NEXTOF:: ";
-		print_vector(to_return);
-	}
 
 	return to_return;
 }
@@ -1170,9 +1154,6 @@ static bool is_forbidden_synonym_verb(const string &orig_str, const string name)
 	to_return.push_back(orig_str);
 	bool orig_is_a_who = matching::is_who(orig_str);
 
-	if(debug) {
-		cout << "FORB::: " << orig_str << " " << name << endl;
-	}
 
 	if( orig_str == "live"
 		&& (name == "travel" || name == "move" || name == "go")
@@ -1437,11 +1418,6 @@ static vector<string> get_clean_names(const vector<DrtPred> &preds, MatchElement
 	vector<string> to_return;
 	for(int n=0; n < preds.size(); ++n) {
 		string header= extract_header(preds.at(n) );
-		if(debug) {
-			cout << "CLEANING::: " << header << " ";
-			DrtVect to_print(preds);
-			print_vector(to_print);
-		}
 
 		if(me->hasElement(header))
 			continue;
@@ -1465,13 +1441,6 @@ double Match::singleMatch(const DrtPred &data, const DrtPred &hyp, MatchSubstitu
 	string head_hyp = extract_header(hyp);
 
 
-	if (debug) {
-		cout << "PROPER3:: " << data << ", " << hyp << endl;
-		cout << "PROPER3:: " << head_data << ", " << head_hyp << endl;
-		cout << "PROPER3:: " << data.tag() << ", " << hyp.tag() << endl;
-		cout << "PROPER3:: " << data.name() << ", " << hyp.name() << endl;
-		cout << "PROPER3:: " << data.is_question() << ", " << hyp.is_question() << endl;
-	}
 	//string what_str = get_what();
 	string what_str = "[what]";
 	if (data.is_verbatim() && !hyp.is_verbatim() && head_hyp.find(what_str) == string::npos
@@ -1493,9 +1462,6 @@ double Match::singleMatch(const DrtPred &data, const DrtPred &hyp, MatchSubstitu
 	}
 	if (data.tag() == "!WP" && hyp.is_question() ) {
 		return 0;
-	}
-	if (debug) {
-		cout << "PROPER4:: " << data << ", " << hyp << endl;
 	}
 	if (head_data.find("[JJ]") != string::npos && hyp.is_adjective()) {
 		return 1;
@@ -1520,9 +1486,6 @@ double Match::singleMatch(const DrtPred &data, const DrtPred &hyp, MatchSubstitu
 		}
 	}
 
-	if (debug) {
-		cout << "PROPER5:: " << data << ", " << hyp << endl;
-	}
 
 	// A proper name can contain a common name ("E5_Freeway" contains "freeway")
 	/// clearly this includes the previous check
@@ -1538,9 +1501,6 @@ double Match::singleMatch(const DrtPred &data, const DrtPred &hyp, MatchSubstitu
 				return 1;
 			}
 		}
-	}
-	if (debug) {
-		cout << "PROPER6:: " << data << ", " << hyp << endl;
 	}
 
 	if (data.is_date() && extract_header(hyp) == "time") {
@@ -1651,11 +1611,6 @@ double Match::singleMatch(const DrtPred &data, const DrtPred &hyp, MatchSubstitu
 	} else if (data.is_verb() && hyp.is_verb()) {
 		string levin_data = d_->get_levin_verb(head_data);
 		string levin_hyp = d_->get_levin_verb(head_hyp);
-		if(debug) {
-			cout << "MOBJ01::: " << data << " " << hyp << endl;
-			cout << "MOBJ02::: " << has_object(data) << " " << has_object(hyp) << endl;
-			cout << "MOBJ03::: " << is_transitive(data) << " " << is_transitive(hyp) << endl;
-		}
 		if ((head_data == "do"
 				&& head_hyp != "be"
 				//&& levin_hyp != "verb.stative"
@@ -1693,11 +1648,6 @@ double Match::singleMatch(const DrtPred &data, const DrtPred &hyp, MatchSubstitu
 					sep = d_->verb_hypernym_dist(all_candidates_hyp.at(n), all_candidates_data.at(m), hyp_height_);
 					implant_header(tmp_pred, extract_header(data));
 					if (sep >= 0.4 && data.unify(tmp_pred, &retDrtMgu)) {
-						if(debug) {
-							cout << "MOBJ1::: " << data << " " << hyp << endl;
-							cout << "MOBJ2::: " << has_object(data) << " " << has_object(hyp) << endl;
-							cout << "MOBJ3::: " << is_transitive(data) << " " << is_transitive(hyp) << endl;
-						}
 
 						if(!has_object(hyp) && !has_object(data) && is_transitive(hyp) && is_transitive(data) )
 							sep += 1.0;
@@ -1709,9 +1659,6 @@ double Match::singleMatch(const DrtPred &data, const DrtPred &hyp, MatchSubstitu
 		}
 	} else if (data.is_complement() && hyp.is_complement()) {
 		if (mtype->matchComplement(data, hyp)) {
-			if (debug) {
-				cout << "MATCHCOMPL::: " << data << " " << hyp << endl;
-			}
 			implant_header(tmp_pred, extract_header(data));
 			if (data.unify(tmp_pred, &retDrtMgu)) {
 				msubs->setDrtMgu(retDrtMgu);
@@ -1739,9 +1686,6 @@ double Match::singleMatch(const DrtPred &data, const DrtPred &hyp, MatchSubstitu
 		string rhs_str = head_data; // the question is always rhs
 		string lhs_str = head_hyp;
 
-		if(debug) {
-			cout << "RHS_STR::: " << rhs_str << endl;
-		}
 
 		string lhs_ref = extract_first_tag(hyp);
 		string rhs_ref = extract_first_tag(data);
@@ -1774,28 +1718,12 @@ double Match::singleMatch(const DrtPred &data, const DrtPred &hyp, MatchSubstitu
 
 		vector<DrtPred> lhs_preds = k_->getPredsFromRef(lhs_ref);
 
-		if(debug) {
-			cout << "LPREDS:::" << endl;
-			print_vector(lhs_preds);
-		}
 
 		vector<string> new_lhs_names = get_clean_names(lhs_preds, &lme_ );
 		lhs_names.insert(lhs_names.end(), new_lhs_names.begin(), new_lhs_names.end());
 
-		if(debug) {
-			cout << "LPREDS:::" << endl;
-			print_vector(lhs_preds);
-		}
 
-		if (debug) {
-			cout << "LNAMES:::";
-			print_vector(lhs_names);
-		}
 
-		if (debug) {
-			cout << "RNAMES:::" << endl;
-			print_vector(rhs_names);
-		}
 
 		if (data.is_PRP()) {
 			vector<string> tmp_names = get_reference_string(rhs_str);
@@ -1807,12 +1735,6 @@ double Match::singleMatch(const DrtPred &data, const DrtPred &hyp, MatchSubstitu
 
 		string selected_name, rselected_name;
 		sep = get_string_vector_distance(d, lhs_names, rhs_names, k_, hyp_height_, &selected_name, &rselected_name);
-		if(debug) {
-			cout << "RSTR:::" << rhs_str << endl;
-			cout << "LSTR:::" << lhs_str << endl;
-			cout << "SELECTED_NAME:::" << selected_name << endl;
-			cout << "W:::" << sep << endl;
-		}
 		if(inverted_person_ && sep < 0.2)
 			sep = get_string_vector_distance(d, rhs_names, lhs_names, k_, hyp_height_, &selected_name, &rselected_name);
 		lme_.insertPrevious(selected_name);
@@ -1825,9 +1747,6 @@ double Match::singleMatch(const DrtPred &data, const DrtPred &hyp, MatchSubstitu
 			} else
 				return 0;
 
-			if(debug) {
-				cout << "NAME_BAR::: " << head_data << " " << head_hyp << endl;
-			}
 
 			if (head_data.find("|") != string::npos) {
 				if(debug)
@@ -1842,9 +1761,6 @@ double Match::singleMatch(const DrtPred &data, const DrtPred &hyp, MatchSubstitu
                implant_header(tmp_pred, extract_header(hyp));
                // check that the Proper Name refers to a person
                bool is_people_name= d->gender_proper_name(head_data) != "";
-               if(debug) {
-               	cout << "PEOPLE_INV::: " << is_people_name << " " << tmp_pred << " " << data << endl;
-               }
                DrtPred tmp_data= data;
                if(is_people_name) {
                	implant_header(tmp_data, extract_header(hyp));
@@ -1860,9 +1776,6 @@ double Match::singleMatch(const DrtPred &data, const DrtPred &hyp, MatchSubstitu
 				is_people_name = d->gender_proper_name(lhs_names.at(lpos)) != "";
 				if(is_people_name)
 					break;
-				if(debug) {
-					cout << "PROPER_NAME::: " << is_people_name << ", " << head_hyp << endl;
-				}
 			}
 			if ((head_data.find("person") != string::npos || head_data.find("[noun.person]") != string::npos) && is_people_name
 					&& data.unify(tmp_pred, &retDrtMgu)) {
@@ -1921,22 +1834,8 @@ double Match::phraseMatchNames(vector<DrtPred> &lpreds, vector<DrtPred> &rpreds,
 					if (debug)
 						start = clock();
 					double wtmp = singleMatch(rpred, lpred, &msubs_tmp, &mtype);
-					if (debug) {
-						clock_t end = clock();
-						int all_time = (end - start);
-						cout << "Mtime_single_match::: " << all_time / (double) CLOCKS_PER_SEC << endl;
-					}
 					DrtMgu tmp_upg = msubs_tmp.getDrtMgu();
-					if (debug) {
-						cout << "MATCHING::::" << lpred << " " << rpred << endl;
-						cout << "MATCHING::::" << wtmp << endl;
-						cout << "MATCHING::::" << negated_upg << endl;
-						cout << "MATCHING::::" << tmp_upg << endl;
-					}
 					if (wtmp != 0 && !(tmp_upg.size() && shortfind(negated_upg, tmp_upg))) {
-						if (debug) {
-							cout << "MATCHING_FINAL4::::" << w << endl;
-						}
 						w += wtmp;
 						DrtMgu orig_upg = msubs2.getDrtMgu();
 						orig_upg.add(tmp_upg);
@@ -1948,32 +1847,16 @@ double Match::phraseMatchNames(vector<DrtPred> &lpreds, vector<DrtPred> &rpreds,
 					}
 				}
 			}
-			if (debug) {
-				clock_t end0 = clock();
-				int all_time = (end0 - start0);
-				cout << "Mtime_all_match::: " << all_time / (double) CLOCKS_PER_SEC << endl;
-			}
 		}
 		if (matched < rpreds.size()) {
 			negated_upg.addWithoutUnification(msubs2.getDrtMgu());
 		} else
 			break;
 	}
-	if (debug) {
-		clock_t end1 = clock();
-		int all_time = (end1 - start1);
-		cout << "Mtime_all_match1::: " << all_time / (double) CLOCKS_PER_SEC << endl;
-	}
 	if (safe == safe_max) {
-		if (debug) {
-			cout << "MATCHING_FINAL2::::" << w << endl;
-		}
 		w = 0;
 	} else {
 		*msubs = msubs2;
-		if (debug) {
-			cout << "MATCHING_FINAL::::" << msubs->getDrtMgu() << endl;
-		}
 	}
 
 	return w;
@@ -2006,12 +1889,6 @@ double Match::phraseMatch(vector<DrtPred> &answers, vector<DrtPred> &hyp, MatchS
 			string head_hyp2 = extract_header(*answerIter);
 
 			DrtMgu tmp_u = msubs_tmp.getDrtMgu();
-			if (debug) {
-				cout << "MATCHING::::" << hypoTmp << ", " << *answerIter << "= " << tmp_w << endl;
-				cout << "MATCHING::::" << hypoTmp.tag() << ", " << answerIter->tag() << "= " << tmp_w << endl;
-				cout << "MATCHING::::" << negated_upg << endl;
-				cout << "MATCHING::::" << tmp_u << endl;
-			}
 
 			if (tmp_w > 0 && !(tmp_u.size() && shortfind(negated_upg, tmp_u))) {
 				upgTmp.insert(upgTmp.end(), tmp_u.begin(), tmp_u.end());
@@ -2024,12 +1901,6 @@ double Match::phraseMatch(vector<DrtPred> &answers, vector<DrtPred> &hyp, MatchS
 		}
 	}
 
-	if (debug) {
-		cout << "HOOKS::: " << hooks << endl;
-		cout << "HOOKS::: " << hyp_hooks << endl;
-		cout << "HOOKS2::: " << endl;
-		print_vector(hyp);
-	}
 
 	if (hooks == 0 || hooks != hyp_hooks)
 		return 0;
@@ -2060,18 +1931,8 @@ double Match::singleGraphMatch(const SingleMatchGraph &lhs, const SingleMatchGra
 	vector<DrtPred> lsubj = lhs.getSubject();
 	vector<DrtPred> rsubj = rhs.getSubject();
 
-	if(debug) {
-		puts("AAAAA");
-		print_vector(lsubj);
-		print_vector(rsubj);
-		puts("AAAAA2");
-	}
 	if (lsubj.size() != 0 && rsubj.size() != 0) {
 		wsubj = this->phraseMatch(lsubj, rsubj, msubs);
-		if (debug) {
-			cout << "SUBJECT_W:::" << wsubj << endl;
-			cout << msubs->getDrtMgu() << endl;
-		}
 		if (wsubj == 0)
 			return 0;
 		else {
@@ -2104,19 +1965,10 @@ double Match::singleGraphMatch(const SingleMatchGraph &lhs, const SingleMatchGra
 	vector<DrtPred> lobj = lhs.getObject();
 	vector<DrtPred> robj = rhs.getObject();
 
-	if(debug) {
-		puts("AAAAA3");
-		print_vector(lobj);
-		print_vector(robj);
-		puts("AAAAA4");
-	}
 	if (lobj.size() == 0 && robj.size() != 0)
 		return 0;
 	if (lobj.size() != 0 && robj.size() != 0) {
 		wobj = this->phraseMatch(lobj, robj, msubs);
-		if (debug) {
-			cout << "OBJECT_W:::" << wobj << endl;
-		}
 		if (wobj == 0)
 			return 0;
 		else {
@@ -2134,18 +1986,6 @@ double Match::singleGraphMatch(const SingleMatchGraph &lhs, const SingleMatchGra
 	vector<vector<DrtPred> > lcompl = lhs.getComplements(msubs->getDrtMgu());
 	vector<vector<DrtPred> > rcompl = rhs.getComplements(msubs->getDrtMgu());
 
-	if(debug) {
-		puts("AAAAA5");
-		for(int n=0; n < lcompl.size(); ++n) {
-			DrtVect drtvect = lcompl.at(n);
-			print_vector(drtvect);
-		}
-		for(int n=0; n < rcompl.size(); ++n) {
-			DrtVect drtvect = rcompl.at(n);
-			print_vector(drtvect);
-		}
-		puts("AAAAA6");
-	}
 
 	if (rcompl.size() != 0 && lcompl.size() == 0)
 		return 0;
@@ -2153,9 +1993,6 @@ double Match::singleGraphMatch(const SingleMatchGraph &lhs, const SingleMatchGra
 	// The question is not matched if the candidate
 	// answer does not have the same complements
 
-	if (debug) {
-		cout << "MSIZE0::: " << rcompl.size() << " " << lcompl.size() << endl;
-	}
 
 	wcompl = 0;
 	int m, matched = 0;
@@ -2164,11 +2001,6 @@ double Match::singleGraphMatch(const SingleMatchGraph &lhs, const SingleMatchGra
 		double wComplTmp = 0;
 		int tmp_matched = 0;
 		for (int n = 0; n < lcompl.size(); ++n) {
-			if(debug) {
-				cout << "COMPLEMENTS::: " << endl;
-				print_vector(rcompl.at(m));
-				print_vector(lcompl.at(n));
-			}
 			wtmp = this->phraseMatch(lcompl.at(n), rcompl.at(m), &msubs_tmp);
 			if (wtmp == 0) {
 				wComplTmp = 0;
@@ -2186,9 +2018,6 @@ double Match::singleGraphMatch(const SingleMatchGraph &lhs, const SingleMatchGra
 			*msubs = msubs_tmp;
 			matched += tmp_matched;
 		}
-	}
-	if (debug) {
-		cout << "MSIZE::: " << wcompl << " " << matched << " " << rcompl.size() << endl;
 	}
 	if ((rcompl.size() && wcompl == 0) || matched != rcompl.size())
 		return 0;
@@ -2221,10 +2050,6 @@ double Match::adverbMatch(const vector<DrtPred> &ladv, const vector<DrtPred> &ra
 
 	for (int rn = 0; rn < radv.size(); ++rn) {
 		vector<string> rpertainyms = d->get_adv_pertainyms(extract_header(radv.at(rn)));
-		if (debug) {
-			puts("PERTAINYMS::: ");
-			print_vector(rpertainyms);
-		}
 		if (rpertainyms.size() == 0)
 			continue;
 
@@ -2322,10 +2147,6 @@ static DrtMgu get_upg_to_negate(MatchSubstitutions msub)
 
 static bool verb_has_broken(const DrtPred &pred)
 {
-	if (debug) {
-		puts("HAS_BROKEN:::");
-		cout << pred << endl;
-	}
 
 	string subj = extract_subject(pred);
 	string obj = extract_object(pred);
@@ -2356,19 +2177,8 @@ double Match::graphMatch(const MatchGraph &lhs, const MatchGraph &rhs, MatchSubs
 	int max_safe = 2;
 	for (; safe < max_safe; ++safe) {
 		*msubs = original_msub;
-		if(debug) {
-			puts("MATCHING_SUBS:::");
-			print_vector(lsubs);
-			print_vector(rsubs);
-		}
-		if(debug) {
-			cout << "RESULT_M0:: " << lsubs.size() << " " << rsubs.size() << endl;
-		}
 		if (lsubs.size() != 0 && rsubs.size() != 0) {
 			wsubs = this->phraseMatchNames(lsubs, rsubs, msubs, negated_upg);
-			if(debug) {
-				cout << "RESULT_M:: " << wsubs << endl;
-			}
 			if (wsubs != 0)
 				w += wsubs;
 			else
@@ -2405,9 +2215,6 @@ double Match::graphMatch(const MatchGraph &lhs, const MatchGraph &rhs, MatchSubs
 
 				}
 
-				if(debug) {
-					cout << "SGM_Result::: " << wtmp << endl;
-				}
 				if (wtmp == 0) {
 					wSentTmp = 0;
 					msubs_tmp = *msubs;
@@ -2425,24 +2232,12 @@ double Match::graphMatch(const MatchGraph &lhs, const MatchGraph &rhs, MatchSubs
 				matched += tmp_matched;
 			}
 		}
-		if (debug) {
-			cout << "NEG_UPG2:::" << negated_upg << endl;
-		}
-		if (debug) {
-			cout << "MSIZE2:::" << rhs_sent.size() << " " << wsentence << " " << matched << endl;
-		}
 		if (!((rhs_sent.size() && wsentence == 0) || matched != rhs_sent.size())) {
 
 			w += wsentence; /// The sentences are counted twice !!
 			break; // break the backtracking
 		}
 		negated_upg.add(get_upg_to_negate(*msubs));
-		if (debug) {
-			cout << "NEG_UPG:::" << negated_upg << endl;
-		}
-	}
-	if(debug) {
-		cout << "SAFE::: " << safe << endl;
 	}
 	if (safe == max_safe) // the backtracking did not reach a solution
 		return 0;
@@ -2481,9 +2276,6 @@ double Match::graphMatch(const MatchGraph &lhs, const MatchGraph &rhs, MatchSubs
 		return 0;
 	w += wquant; /// The specifications are counted twice !!
 
-	if (debug) {
-		puts("COMPARE_SPECS:::");
-	}
 
 	// compare specifications
 	vector<vector<DrtPred> > lspec = lhs.getSpecifications();
@@ -2517,19 +2309,12 @@ double Match::graphMatch(const MatchGraph &lhs, const MatchGraph &rhs, MatchSubs
 		return 0;
 	w += wspec; /// The specifications are counted twice !!
 
-	if (debug) {
-		puts("COMPARE_SPECS2:::");
-	}
 
 	// last check for broken sentences
 	siter2 = rhs_sent.begin();
 	if ((siter2->getSubject().size() == 0 || siter2->getObject().size() == 0) && verb_has_broken(siter2->getVerb())) {
 		DrtVect complete_rhs = rhs.getDrs();
 
-		if (debug) {
-			puts("COMPLETE_RHS");
-			print_vector(complete_rhs);
-		}
 
 		siter1 = lhs_sent.begin();
 		vector<DrtPred> lsubj = siter1->getSubject();
@@ -2542,10 +2327,6 @@ double Match::graphMatch(const MatchGraph &lhs, const MatchGraph &rhs, MatchSubs
 		MatchSubstitutions msubs_tmp = *msubs;
 		w2 = this->graphMatchNames(incomplete_lhs, complete_rhs, &msubs_tmp);
 
-		if (debug) {
-			puts("COMPLETE_RHS2:::");
-			cout << w2 << endl;
-		}
 
 		if (w2 == 0)
 			return 0;
@@ -2809,10 +2590,6 @@ double Match::singlePhraseMatch(vector<DrtPred> answers, vector<DrtPred> &hyp, M
 
 	answers = promote_elements(answers);
 
-	if(debug) {
-		cout << "AFTER_PROMOTION:::" << endl;
-		print_vector(answers);
-	}
 
 	answers = multiply_what(answers);
 
@@ -2821,12 +2598,6 @@ double Match::singlePhraseMatch(vector<DrtPred> answers, vector<DrtPred> &hyp, M
 
 	MatchGraph lhs(answers), rhs(hyp);
 
-	if (debug) {
-		puts("BBBBBBB");
-		print_vector(answers);
-		print_vector(hyp);
-		puts("BBBBBBB2");
-	}
 	lhs.computeDrtMguForward();
 	rhs.computeDrtMguForward();
 
@@ -2836,9 +2607,6 @@ double Match::singlePhraseMatch(vector<DrtPred> answers, vector<DrtPred> &hyp, M
 		if (debug)
 			start = clock();
 
-		if (debug) {
-			puts("HAS_VERB:::");
-		}
 		double w1 = 0, w2 = 0;
 		w1 = this->graphMatch(lhs, rhs, msubs);
 		w1 /= size;
@@ -2847,14 +2615,6 @@ double Match::singlePhraseMatch(vector<DrtPred> answers, vector<DrtPred> &hyp, M
 		if (w1) {
 			(*msubs) / rhs.getDrtMguBackward();
 			(*msubs) / lhs.getDrtMguBackward();
-			if (debug) {
-				cout << "W1:: " << w1 << ", " << msubs->getDrtMgu() << endl;
-			}
-			if (debug) {
-				clock_t end = clock();
-				all_time += (end - start);
-				cout << "Mtime13::: " << all_time / (double) CLOCKS_PER_SEC << endl;
-			}
 			return w1;
 		}
 
@@ -2865,12 +2625,6 @@ double Match::singlePhraseMatch(vector<DrtPred> answers, vector<DrtPred> &hyp, M
 		msubs->setDrtMgu(new_upg);
 		vector<DrtPred> inverted_question = invert_TO_BE(hyp);
 		MatchGraph lhs2(answers), rhs2(inverted_question);
-		if (debug) {
-			puts("BBBBBBB3");
-			print_vector(answers);
-			print_vector(inverted_question);
-			puts("BBBBBBB4");
-		}
 		w2 = this->graphMatch(lhs2, rhs2, msubs);
 		w2 /= size;
 		lme_.clear();
@@ -2878,11 +2632,6 @@ double Match::singlePhraseMatch(vector<DrtPred> answers, vector<DrtPred> &hyp, M
 		if (w1 || w2) {
 			(*msubs) / rhs.getDrtMguBackward();
 			(*msubs) / lhs.getDrtMguBackward();
-			if (debug) {
-				clock_t end = clock();
-				all_time += (end - start);
-				cout << "Mtime14::: " << all_time / (double) CLOCKS_PER_SEC << endl;
-			}
 			return max(w1, w2);
 		}
 
@@ -2891,9 +2640,6 @@ double Match::singlePhraseMatch(vector<DrtPred> answers, vector<DrtPred> &hyp, M
 		// One of the two drs has no verb. Different matching algorithm:
 		double w;
 
-		if (debug) {
-			puts("MATCHING_NAMES:::");
-		}
 
 		DrtVect lpreds = lhs.getDrs();
 		DrtVect rpreds = rhs.getDrs();
@@ -2912,10 +2658,6 @@ double Match::singlePhraseMatch(vector<DrtPred> answers, vector<DrtPred> &hyp, M
 		lme_.clear();
 		rme_.clear();
 
-		if(debug) {
-			cout << "RPREDS_FINAL::: ";
-			print_vector(rpreds);
-		}
 
 		if(has_uninstantiated(rpreds)) {
 			return 0;
@@ -2954,12 +2696,6 @@ DrtVect Match::substituteAllWithRule(DrtVect drtvect, const pair<DrtVect,DrtVect
 
 	DrtVect hyp= rule.second;
 
-	if (debug) {
-		puts("BBBBBBB");
-		print_vector(drtvect);
-		print_vector(hyp);
-		puts("BBBBBBB2");
-	}
 
 
 	MatchSubstitutions msubs;
@@ -2967,9 +2703,6 @@ DrtVect Match::substituteAllWithRule(DrtVect drtvect, const pair<DrtVect,DrtVect
 	DrtVect clean_drtvect = clean_after_colon(drtvect);
 	double w= this->singlePhraseMatch(clean_drtvect,hyp,&msubs);
 	if(w < 0.1) {
-		if(debug) {
-			cout << "W_PRE_INV::: " << w << endl;
-		}
 		vector<DrtPred> inverted = invert_TO_BE(clean_drtvect);
 		w= this->phraseMatchNames(inverted,hyp,&msubs,negated_upg);
 		if(w < 0.1) {

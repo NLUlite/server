@@ -457,9 +457,6 @@ bool constituents::can_co_unify(const constituents &rhs, int pos1, int pos2, con
 	for (i1 = tree_.begin(); i1 != tree_.end(); ++i1) {
 		for (i2 = rhs_tree.begin(); i2 != rhs_tree.end(); ++i2, ++safe) {
 
-			if (debug) {
-				cout << "SAFE2::: " << safe << endl;
-			}
 
 			if (safe > safe_max)
 				throw std::runtime_error("Constituents unification exceeded the safety limit!");
@@ -667,9 +664,6 @@ vector<pair<pair<int, int>, constituents> > composition::get_connections(const P
 		//pi= binary.begin();
 		for (pos2 = 0; hi2 != ctree_.end(); ++hi2, ++pos2, ++safe) {
 			constituents constit;  // The result of the unification
-			if (debug) {
-				cout << "SAFE:::" << safe << endl;
-			}
 
 			bool left_nish = false;
 			bool right_nish = false;
@@ -708,9 +702,6 @@ vector<pair<pair<int, int>, constituents> > composition::get_connections(const P
 		}
 	}
 
-	if (debug) {
-		cout << "FINISHED::: " << endl;
-	}
 
 	return connections;
 }

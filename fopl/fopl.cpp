@@ -386,10 +386,6 @@ PredTree Predicate::readLiteral(const std::string &literal)
 	int incr = 0;
 	for (PredTree::iterator ptIter = pt.begin(); ptIter != pt.end(); ++ptIter, ++incr)
 		if (ptIter->size() == 0) {
-			if (debug) {
-				std::cerr << str << " (" << incr << ") : not a valid predicate: missing term.\nSetting to nil.\n";
-				predicate = PredTree("nil");
-			}
 			break;
 		}
 	return pt;

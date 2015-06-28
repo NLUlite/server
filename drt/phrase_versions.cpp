@@ -105,10 +105,6 @@ static vector<DrtPred> get_not_connected(const DrtVect &orig_drt, const vector<D
 		}
 	}
 
-	if (debug) {
-		std::cout << "UNCONNECTED:: " << std::endl;
-		print_vector(not_connected);
-	}
 
 	return not_connected;
 }
@@ -248,9 +244,6 @@ phrase_versions::phrase_versions(const string &str, PhraseInfo *pi, Context *c, 
 			if (debug)
 				std::cout << "PHRASE_ITERATION04" << n << endl;
 
-			if (debug) {
-				std::cerr << "TAGS:::" << endl;
-			}
 			parser_.clear(); // clear the previous parser constraints
 			parser_.setTags(cleared_tags);
 			parser_.do_parse();
@@ -271,9 +264,6 @@ phrase_versions::phrase_versions(const string &str, PhraseInfo *pi, Context *c, 
 		if (debug)
 			std::cout << "PHRASE_ITERATION05" << n << endl;
 		if (noPRN.size() && !shortfind(already_noPRN, noPRN)) {
-			if (debug) {
-				std::cerr << "NO_PRN:::" << endl;
-			}
 			parser_.clear(); // clear the previous parser constraints
 			parser_.setForbiddenPRN(noPRN);
 			parser_.setTags(tagged);
@@ -292,9 +282,6 @@ phrase_versions::phrase_versions(const string &str, PhraseInfo *pi, Context *c, 
 			}
 		}
 		if (noSBAR.size() && !shortfind(already_noSBAR, noSBAR)) {
-			if (debug) {
-				std::cerr << "NO_SBAR:::" << endl;
-			}
 			parser_.clear(); // clear the previous parser constraints
 			parser_.setForbiddenSBAR(noSBAR);
 			parser_.setTags(tagged);
@@ -312,9 +299,6 @@ phrase_versions::phrase_versions(const string &str, PhraseInfo *pi, Context *c, 
 			}
 		}
 		if (!(new_tree == FuzzyPred()) && !shortfind(already_new_tree, new_tree)) {
-			if (debug) {
-				std::cerr << "NEW_TREE:::" << endl;
-			}
 			already_new_tree.push_back(new_tree);
 			try {
 				phrase another_phrase(new_tree, phrase_info_);

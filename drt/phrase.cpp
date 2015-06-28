@@ -1676,15 +1676,7 @@ phrase::phrase(const FuzzyPred &pred, PhraseInfo *pi) :
 	PredTree binary = get_binary(constit);
 	binary = get_corrected(binary); // corrects small mistakes and implements exceptions
 	string str;
-	if (debug) {
-		printLikeTree(binary, str);
-		std::cout << str << std::endl;
-	}
 
-	if (debug||measure_time) {
-		clock_t end = clock();
-		cout << "Mtime_phrase1::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 	if (debug || measure_time)
 		start = clock();
 
@@ -1708,10 +1700,6 @@ phrase::phrase(const FuzzyPred &pred, PhraseInfo *pi) :
 		std::cout << "------------" << std::endl;
 	compute_constit(composition_);
 
-	if (debug||measure_time) {
-		clock_t end = clock();
-		cout << "Mtime_phrase2::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 
 	if (debug || measure_time)
 		start = clock();
@@ -1724,10 +1712,6 @@ phrase::phrase(const FuzzyPred &pred, PhraseInfo *pi) :
 
 	this->restore_names(pred);
 
-	if (debug||measure_time) {
-		clock_t end = clock();
-		cout << "Mtime_phrase3::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 }
 
 vector<int> phrase::get_prn_depths() const

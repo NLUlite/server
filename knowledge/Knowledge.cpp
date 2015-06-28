@@ -113,9 +113,6 @@ static double get_weight_map_element(MapRNDouble &map_element, const pair<SPActi
 {
 	double to_return=0;
 	MapRNDouble::iterator miter = map_element.find(key);
-	if(debug) {
-		cout << "KKEY::: " << key.first << " " << key.second << " " << map_element.size() << endl;
-	}
 
 	if (miter != map_element.end()) {
 		to_return = miter->second;
@@ -129,9 +126,6 @@ static double get_rules_weight_map_element(RulesMapRNDouble &map_element, const 
 {
 	double to_return=0;
 	RulesMapRNDouble::iterator miter = map_element.find(key);
-	if(debug) {
-		cout << "KKEY::: " << key.first << " " << key.second << " " << map_element.size() << endl;
-	}
 
 	if (miter != map_element.end()) {
 		to_return = miter->second;
@@ -788,9 +782,6 @@ void insert_vector_into_map(M &m, V &v, const string &s)
 {
 	for (int n = 0; n < v.size(); ++n) {
 		m[s].push_back(v.at(n));
-		if(debug) {
-			cout << "KVECT_LEVIN::: " << s << " "  << v.at(n) << endl;
-		}
 	}
 }
 
@@ -825,9 +816,6 @@ void insert_vsp(MapStVSt &m, const string &key, SPAction pa)
 void Knowledge::insertNameIntoMaps(const DrsPersonae &p, vector<string> &all_refs, const string &name_levin, const string &orig_name)
 {
 	metric *d = metric_singleton::get_metric_instance();
-	if(debug) {
-		cout << "KDIST::: " << orig_name << " " << name_levin << endl;
-	}
 	for (int n = 0; n < all_refs.size(); ++n) {
 		string ref = all_refs.at(n);
 		bool ref_is_subj = p.refIsSubj(ref);
@@ -835,23 +823,14 @@ void Knowledge::insertNameIntoMaps(const DrsPersonae &p, vector<string> &all_ref
 		vector<SPAction> subj_actions= p.getSubjActions(ref);
 		vector<SPAction>  obj_actions= p.getObjActions(ref);
 
-		if(debug) {
-			cout << "KREF::: " << ref << endl;
-		}
 
 		for(int na=0; na < subj_actions.size(); ++na) {
 			SPAction pa= subj_actions.at(na);
 			subj_name_refs_[name_levin].push_back(pa);
-			if(debug) {
-				cout << "KSUBJ_LEVIN::: " << name_levin << " " << ref << " " << pa->getRef() << " " << endl;
-			}
 		}
 		for(int na=0; na < obj_actions.size(); ++na) {
 			SPAction pa= obj_actions.at(na);
 			obj_name_refs_[name_levin].push_back(pa);
-			if(debug) {
-				cout << "KOBJ_LEVIN::: " << name_levin << " " << ref << " " << pa->getRef() << " "  << endl;
-			}
 		}
 		//if(subj_actions.size() == 0 && obj_actions.size() == 0) {
 		{
@@ -860,9 +839,6 @@ void Knowledge::insertNameIntoMaps(const DrsPersonae &p, vector<string> &all_ref
 				//insert_vsp(name_refs_,name_levin,pas.at(m));
 				name_refs_[name_levin].push_back(pas.at(m));
 				//name_weigths_[make_pair(pas.at(m),name_levin)] = w;
-				if(debug) {
-					cout << "KNAME_LEVIN::: " << name_levin << " " << ref << " " << " "  << endl;
-				}
 			}
 		}
 	}
@@ -884,18 +860,9 @@ void Knowledge::processPersonae(DrsPersonae &p)
 			string reference = tmp_persona.getReference();
 
 			vector<DrtPred> pers_names = tmp_persona.getPreds();
-			if(debug) {
-				cout << "PREF2::: " ;
-				print_vector(pers_names);
-			}
 			for (int m = 0; m < pers_names.size(); ++m) {
 				string name_str = extract_header(pers_names.at(m));
 
-				if(debug) {
-					if(pers_names.at(m).is_PRP() ) {
-						cout << "PRP_PERS::: " << pers_names.at(m) << endl;
-					}
-				}
 
 				vector<string> all_names = get_candidate_names_for_noun(name_str);
 				vector<string> all_refs;
@@ -946,9 +913,6 @@ void Knowledge::processPersonae(DrsPersonae &p)
 				vector<string> all_names = get_candidate_names_for_complements(header);
 				for (int m = 0; m < all_names.size(); ++m) {
 					string compl_levin = all_names.at(m);
-					if(debug) {
-						cout << "KCOMPL_LEVIN::: " << compl_levin << " "  << fref << " " << sref << endl;
-					}
 					vector<SPAction> all_refs;
 					all_refs = p.getNameActions(sref);
 					insert_vector_into_map(complement_refs_, all_refs, compl_levin);
@@ -992,9 +956,6 @@ void Knowledge::processPersonae(DrsPersonae &p)
 				for (int m = 0; m < all_names.size(); ++m) {
 					string verb_levin = all_names.at(m);
 					verb_refs_[verb_levin].push_back(*aiter); // store the name of the Persona
-					if(debug) {
-						cout << "KVERB_LEVIN1::: " << verb_levin << " " << " " << verb_str<< " " << endl;
-					}
 					//// "Happen" and "do" are generic verbs. All the
 					//// actions are stored under these verbs as well. It
 					//// is not an elegant solution.
@@ -1006,9 +967,6 @@ void Knowledge::processPersonae(DrsPersonae &p)
 					for (int j = 0; j < alt_verbs.size(); ++j) {
 						//for (int j2 = 0; j2 < all_refs.size(); ++j2) {
 						verb_refs_[alt_verbs.at(j)].push_back(*aiter);
-						if(debug) {
-							cout << "KVERB_LEVIN2::: " << verb_levin << " " << " " << verb_str<< " " << endl;
-						}
 					}
 				}
 				// store the names of the complements
@@ -1049,9 +1007,6 @@ void Knowledge::insertRulesNameIntoMaps(const Rules &r, vector<string> &all_refs
 		if (ref_is_subj) {
 			rules_subj_name_refs_[name_levin].push_back(ref);
 			rules_subj_weigths_[make_pair(ref,name_levin)] = w;
-			if(debug) {
-				cout << "RULES_KSUBJ_LEVIN::: " << name_levin << " " << ref << endl;
-			}
 		}
 		if (ref_is_obj) {
 			vector<string> new_refs = r.mapRefToActionRef(ref);
@@ -1059,9 +1014,6 @@ void Knowledge::insertRulesNameIntoMaps(const Rules &r, vector<string> &all_refs
 			for (int m = 0; m < new_refs.size(); ++m) {
 				rules_obj_name_refs_[name_levin].push_back(new_refs.at(m));
 				rules_obj_weigths_[make_pair(new_refs.at(m),name_levin)] = w;
-				if(debug) {
-					cout << "RULES_KOBJ_LEVIN::: " << name_levin << " " << new_refs.at(m) << endl;
-				}
 			}
 		}
 		if (!ref_is_subj && !ref_is_obj) {
@@ -1289,15 +1241,7 @@ vector<Candidate> Knowledge::getCandidate(const string &ref, double remaining_ti
 
 			drs = this->getFullDrs(drs);
 
-			if(debug) {
-				cout << "CANDIDATE_DRS::: " << elapsed << " " << remaining_time << endl;
-				print_vector(drs);
-			}
 
-			if (debug || measure_time) {
-				clock_t end = clock();
-				cout << "Mtime2-04::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-			}
 
 
 			string link = (*aiter)->getLink();
@@ -1344,15 +1288,7 @@ vector<Candidate> Knowledge::getCandidate(SPAction aiter, double remaining_time 
 
 		drs = this->getFullDrs(drs);
 
-		if (debug || measure_time) {
-			clock_t end = clock();
-			cout << "Mtime2-04::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-		}
 
-		if(debug) {
-			cout << "CANDIDATE_DRS::: " << elapsed << " " << remaining_time << endl;
-			print_vector(drs);
-		}
 
 		string link = aiter->getLink();
 		string text = aiter->getText();
@@ -1416,10 +1352,6 @@ vector<RulesCandidate> Knowledge::getRulesCandidate(const string &ref, double re
 
 DrtVect Knowledge::getFullDrs(DrtVect drs)
 {
-	if(debug) {
-		cout << "KNOW_DRS::: " << endl;
-		print_vector(drs);
-	}
 
 	vector<DrtPred> drs_tmp(drs);
 	string verb_ref = "";
@@ -1427,15 +1359,8 @@ DrtVect Knowledge::getFullDrs(DrtVect drs)
 		for (int m = 0; m < drs_tmp.size(); ++m) {
 			if (drs.at(m).is_name()) {
 				string ref_action = extract_first_tag(drs_tmp.at(m));
-				if(debug) {
-					cout << "KNOW_SPEC0::: " << ref_action << endl;
-				}
 				vector<vector<DrtPred> > specs = this->getSpecifications(ref_action);
 				for (int n = 0; drs.size() < max_items && n < specs.size() && n < max_specs; ++n) {
-					if(debug) {
-						cout << "KNOW_SPEC::: " ;
-						print_vector(specs.at(n));
-					}
 					vector<DrtPred> single_spec = specs.at(n);
 					if (single_spec.size() && !shortfind(drs, single_spec.at(0)))
 						drs.insert(drs.end(), single_spec.begin(), single_spec.end());
@@ -1700,9 +1625,6 @@ int KThreadCounter::getCurrentNumber()
 	boost::mutex::scoped_lock lock(io_mutex_kcounter); // this method is used concurrently
 	clock_t current_time = clock();
 	double elapsed = (current_time - time_start_) / (double) CLOCKS_PER_SEC;
-	if(debug) {
-		cout << "Mtime2-05::: " << time_start_ << " " << current_time << " " << elapsed << " " << max_time_ << endl;
-	}
 
 	if(elapsed > max_time_)
 		return -1;
@@ -1786,9 +1708,6 @@ void ParserKThread::launchMatchingThread(KResult *results, Match *match, DrtVect
 	double w;
 
 	clock_t start;
-	if (debug || measure_time) {
-		start = clock();
-	}
 
 	if (has_some_broken(question)) {// && !has_only_broken(question) ) {
 		bool match_names = true;
@@ -1801,12 +1720,6 @@ void ParserKThread::launchMatchingThread(KResult *results, Match *match, DrtVect
 		*results = boost::make_tuple(msubs, w, candidate.get<1>(), candidate.get<2>(), candidate.get<3>());
 	} else {
 		*results = boost::make_tuple(msubs, -1, candidate.get<1>(), candidate.get<2>(), candidate.get<3>());
-	}
-	if (debug || measure_time) {
-		clock_t end = clock();
-		cout << "Mtime2-0003::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-		cout << "TMP_PRED::: ";
-		print_vector(tmp_pred);
 	}
 }
 
@@ -1843,9 +1756,6 @@ vector<KResult> Knowledge::findMatch(vector<SPAction> &all_refs, vector<DrtPred>
 	vector<KResult> results;
 
 	clock_t start;
-	if (debug || measure_time) {
-		start = clock();
-	}
 
 	int max_threads = 1;
 	Parameters *par = parameters_singleton::instance();
@@ -1872,11 +1782,6 @@ vector<KResult> Knowledge::findMatch(vector<SPAction> &all_refs, vector<DrtPred>
 		n += candidates.size();
 		all_candidates.insert(all_candidates.end(), candidates.begin(), candidates.end());
 	}
-	if (debug || measure_time) {
-		clock_t end = clock();
-		cout << "Mtime9::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-		cout << "SIZE::: " << all_candidates.size() << endl;
-	}
 
 	max_time = min(fixed_time_, wi_.getTimeout()) ;
 	num_threads = min(all_candidates.size(), max_threads);
@@ -1891,10 +1796,6 @@ vector<KResult> Knowledge::findMatch(vector<SPAction> &all_refs, vector<DrtPred>
 	tmp_results = clean_results(tmp_results);
 	results.insert(results.end(), tmp_results.begin(), tmp_results.end());
 
-	if (debug || measure_time) {
-		clock_t end = clock();
-		cout << "Mtime19::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 
 	return results;
 }
@@ -2284,37 +2185,22 @@ void Knowledge::find_all_candidates(DrtVect &question, CandidatesStruct *cstruct
 				MapStVSt::iterator miter;
 				string name_str = strings.at(n);
 				string name_levin = name_str;
-				if(debug) {
-					cout << "NAME_REFS0::: " << qstr << endl;
-				}
 				vector<SPAction> ref_str;
 				if (is_subject_of_first_verb(question, fref) && !is_broken(fref)) {
 					miter = subj_name_refs_.find(name_levin);
 					if (miter != subj_name_refs_.end()) {
-						if(debug) {
-							cout << "SUBJ_REFS::: " << name_levin << endl;
-						}
 						vector<SPAction> ref_str2= miter->second;
 						ref_str.insert(ref_str.end(), ref_str2.begin(), ref_str2.end());
 					}
 				} else if (is_object_of_first_verb(question, fref) && !is_broken(fref)) {
 					miter = obj_name_refs_.find(name_levin);
 					if (miter != obj_name_refs_.end()) {
-						if(debug) {
-							cout << "OBJ_REFS::: " << name_levin << endl;
-						}
 						vector<SPAction> ref_str2= miter->second;
 						ref_str.insert(ref_str.end(), ref_str2.begin(), ref_str2.end());
 					}
 				} else if (!is_broken(fref)) {
 					miter = name_refs_.find(name_levin);
-					if(debug) {
-						cout << "NAME_REFS::: " << name_levin << endl;
-					}
 					if (miter != name_refs_.end()) {
-						if(debug) {
-							cout << "NAME_REFS1::: " << name_levin << endl;
-						}
 						vector<SPAction> ref_str2= miter->second;
 						ref_str.insert(ref_str.end(), ref_str2.begin(), ref_str2.end());
 					}
@@ -2559,11 +2445,6 @@ vector<pair<SPAction,double> > Knowledge::getRefWeights(const DrtVect &question,
 		}
 		w = ws * wo * wv * wn;
 		to_return.push_back( make_pair(refs.at(n),w) );
-		if(debug) {
-			cout << "KWEIGTH0::: " << subj << " " << obj << " " << verb << " ";
-			print_vector(names);
-			cout << "KWEIGTH1::: " << w << " " << ws << " " << wo << " " << wv << " " << wn << " " << refs.at(n) << endl;
-		}
 	}
 
 	return to_return;
@@ -2657,39 +2538,12 @@ vector<KnowledgeAnswer> Knowledge::getAnswers(drt &question_drt)
 
 	//find_all_candidates(question, verb_refs, subj_refs, obj_refs, name_refs, compl_refs, lacks_verb, lacks_subj, lacks_obj);
 	this->find_all_candidates(question, &cstruct);
-	if (debug || measure_time) {
-		clock_t end = clock();
-		cout << "Mtime2::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 	if (debug || measure_time)
 		start = clock();
 
 	vector<SPAction> all_refs = refs_intersection(cstruct);
 
-	if (debug || measure_time) {
-		clock_t end = clock();
-		cout << "Mtime2-2::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 
-	if (debug || show_candidates) {
-		cout << "CANDIDATES:::" << all_refs.size() << endl;
-		print_vector(all_refs);
-		puts("CSUBJ:::");
-		subj_refs= cstruct.getSubjRefs();
-		print_vector( subj_refs );
-		puts("COBJ:::");
-		obj_refs= cstruct.getObjRefs();
-		print_vector(obj_refs);
-		puts("CVERB:::");
-		verb_refs= cstruct.getVerbRefs();
-		print_vector(verb_refs);
-		puts("CNAME:::");
-		name_refs= cstruct.getNameRefs();
-		print_vector(name_refs);
-		puts("CCOMPL:::");
-		compl_refs= cstruct.getComplRefs();
-		print_vector(compl_refs);
-	}
 
 	// Find the DrtMgus by matching the candidates with the answers
 	if (debug || measure_time)
@@ -2697,10 +2551,6 @@ vector<KnowledgeAnswer> Knowledge::getAnswers(drt &question_drt)
 	vector<KResult> results;
 	if(wi_.getTimeout() > 0)
 		results = this->findMatch(all_refs, question);
-	if (debug || measure_time) {
-		clock_t end = clock();
-		cout << "Mtime3::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 	// Unifies with the question
 
 	vector<KnowledgeAnswer> answers;
@@ -3172,40 +3022,13 @@ vector<KnowledgeAnswer> Knowledge::getRules(vector<DrtPred> &question)
 		start = clock();
 
 	this->find_all_rules_candidates(question, &cstruct);
-	if (debug || measure_time) {
-		clock_t end = clock();
-		cout << "Mtime_RULES2-2::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 
 	if(debug || measure_time)
 		start = clock();
 
 	vector<string> all_refs = rules_refs_intersection(cstruct);
 
-	if (debug || measure_time) {
-		clock_t end = clock();
-		cout << "Mtime_RULES2-3::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 
-	if (debug || show_candidates) {
-		cout << "RULES_CANDIDATES:::" << all_refs.size() << endl;
-		print_vector(all_refs);
-		puts("CSUBJ:::");
-		subj_refs= cstruct.getSubjRefs();
-		print_vector( subj_refs );
-		puts("COBJ:::");
-		obj_refs= cstruct.getObjRefs();
-		print_vector(obj_refs);
-		puts("CVERB:::");
-		verb_refs= cstruct.getVerbRefs();
-		print_vector(verb_refs);
-		puts("CNAME:::");
-		name_refs= cstruct.getNameRefs();
-		print_vector(name_refs);
-		puts("CCOMPL:::");
-		compl_refs= cstruct.getComplRefs();
-		print_vector(compl_refs);
-	}
 
 	// Find the DrtMgus by matching the candidates with the answers
 	if(debug || measure_time)
@@ -3213,10 +3036,6 @@ vector<KnowledgeAnswer> Knowledge::getRules(vector<DrtPred> &question)
 
 	vector<KRuleResult> results = this->findRulesMatch(all_refs, question);
 
-	if (debug || measure_time) {
-		clock_t end = clock();
-		cout << "Mtime_RULES2-4::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 
 	// Unifies with the question
 
@@ -3650,20 +3469,12 @@ vector<Candidate> Knowledge::getAnswerCandidates(drt &question_drt)
 
 	this->find_all_candidates(question, &cstruct);
 
-	if (debug || measure_time) {
-		clock_t end = clock();
-		cout << "Mtime2-011::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 
 	if (debug || measure_time)
 		start = clock();
 
 	vector<SPAction> all_refs = refs_intersection(cstruct);
 
-	if (debug || measure_time) {
-		clock_t end = clock();
-		cout << "Mtime2-012::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 
 	int max_threads = 1;
 	Parameters *par = parameters_singleton::instance();
@@ -3685,10 +3496,6 @@ vector<Candidate> Knowledge::getAnswerCandidates(drt &question_drt)
 	}
 	g0.join_all();
 
-	if (debug || measure_time) {
-		clock_t end = clock();
-		cout << "Mtime2-02::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 
 	vector<Candidate> all_candidates;
 	int n = 0;
@@ -3701,30 +3508,7 @@ vector<Candidate> Knowledge::getAnswerCandidates(drt &question_drt)
 	if (debug || measure_time)
 		start = clock();
 
-	if (debug || show_candidates) {
-		cout << "CANDIDATES:::" << all_refs.size() << endl;
-		print_vector(all_refs);
-		puts("CSUBJ:::");
-		subj_refs= cstruct.getSubjRefs();
-		print_vector( subj_refs );
-		puts("COBJ:::");
-		obj_refs= cstruct.getObjRefs();
-		print_vector(obj_refs);
-		puts("CVERB:::");
-		verb_refs= cstruct.getVerbRefs();
-		print_vector(verb_refs);
-		puts("CNAME:::");
-		name_refs= cstruct.getNameRefs();
-		compl_refs= cstruct.getComplRefs();
-		print_vector(name_refs);
-		puts("CCOMPL:::");
-		print_vector(compl_refs);
-	}
 
-	if (debug || measure_time) {
-		clock_t end = clock();
-		cout << "Mtime2-C02::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 
 	return all_candidates;
 }
@@ -3757,17 +3541,10 @@ vector<KnowledgeAnswer> Knowledge::getAnswers(drt &question_drt, vector<Candidat
 	tmp_results = clean_results(tmp_results);
 	results.insert(results.end(), tmp_results.begin(), tmp_results.end());
 
-	if (debug || measure_time) {
-		clock_t end = clock();
-		cout << "Mtime2-003::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 
 	if (debug || measure_time)
 		start = clock();
 
-	if(debug || show_candidates) {
-		cout << "RESULT_SIZE::: " << results.size() << endl;
-	}
 
 	// Unifies with the question
 	QuestionList qlist = question_drt.getQuestionList();
@@ -3800,23 +3577,11 @@ vector<KnowledgeAnswer> Knowledge::getAnswers(drt &question_drt, vector<Candidat
 			if (debug || measure_time)
 				start = clock();
 			CodePred result = engine_.run(code);
-			if (debug || measure_time) {
-				clock_t end = clock();
-				cout << "Mtime2-006::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-				cout << "PREDS::: ";
-				print_vector(tmp_drs);
-			}
 
 
 			if (result == Engine::pt_true)
 				to_add = true;
 			this->clearAllTemporary();
-		}
-		if (debug || measure_time) {
-			clock_t end = clock();
-			cout << "Mtime2-005::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-			cout << "PREDS::: ";
-			print_vector(tmp_drs);
 		}
 
 
@@ -3838,10 +3603,6 @@ vector<KnowledgeAnswer> Knowledge::getAnswers(drt &question_drt, vector<Candidat
 		}
 	}
 
-	if (debug || measure_time) {
-		clock_t end = clock();
-		cout << "Mtime2-004::: " << (end - start) / (double) CLOCKS_PER_SEC << endl;
-	}
 
 
 	return answers;

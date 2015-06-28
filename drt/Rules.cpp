@@ -231,10 +231,6 @@ static int find_prep_with_target(vector<DrtPred> &pre_drt, string from_str)
 static boost::tuple<string, string, string> get_reference_percolated_to_verb(vector<DrtPred> &pre_drt, int n)
 /// Implement a recursive algorithm !!!
 {
-	if (debug) {
-		cout << "PERCOLATING::: ";
-		print_vector(pre_drt);
-	}
 
 	boost::tuple<string, string, string> to_return(boost::make_tuple(extract_first_tag(pre_drt.at(n)), extract_subject(pre_drt.at(n)), extract_object(pre_drt.at(n)) ));
 	string from_str = extract_first_tag(pre_drt.at(n));
@@ -244,10 +240,6 @@ static boost::tuple<string, string, string> get_reference_percolated_to_verb(vec
 	}
 	if (m == -1) { // if there is no verb, try to find a preposition
 		m = find_prep_with_target(pre_drt, from_str);
-	}
-	if (debug) {
-		cout << "PERCOLATIN2::: ";
-		cout << m << endl;
 	}
 
 	if (m != -1) { // There might not be such a verb
@@ -358,13 +350,6 @@ boost::tuple<string, string, string> percolated_reference_verb_subj_obj = get_re
 				if (percolated_reference_verb_subj_obj.get<0>() != "none"
 					&& !is_valid_subject_ref( percolated_reference_verb_subj_obj.get<1>() )
 						) {
-					if (debug) {
-						puts("PERCOLATED_VERB:::");
-						cout << percolated_reference_verb_subj_obj.get<0>()
-							<< " "
-							<< percolated_reference_verb_subj_obj.get<2>()
-							<< endl;
-					}
 					if(!is_valid_subject_ref( percolated_reference_verb_subj_obj.get<2>()) )
 						persona_pointer_[ref].push_back(percolated_reference_verb_subj_obj.get<0>());
 					else
@@ -373,10 +358,6 @@ boost::tuple<string, string, string> percolated_reference_verb_subj_obj = get_re
 				if (percolated_reference_verb_subj_obj.get<1>() != "none"
 					&& is_valid_subject_ref( percolated_reference_verb_subj_obj.get<1>() )
 						) {
-					if (debug) {
-						puts("PERCOLATED_SUBJ:::");
-						cout << percolated_reference_verb_subj_obj.get<1>() << endl;
-					}
 					persona_pointer_[ref].push_back(percolated_reference_verb_subj_obj.get<1>());
 				}
 			}
@@ -410,16 +391,10 @@ boost::tuple<string, string, string> percolated_reference_verb_subj_obj = get_re
 				string ref  = extract_subject(*diter);
 				string oref = extract_object(*diter);
 				if (!shortfind(subj_refs_, ref)) {
-					if (debug) {
-						cout << "RULES_SUBJ_REF:::" << ref << endl;
-					}
 					subj_refs_[ref] = true;
 				}
 				if (!shortfind(obj_refs_, oref)) {
 					obj_refs_[oref] = true;
-					if (debug) {
-						cout << "Rules_OBJ_REF:::" << oref << endl;
-					}
 				}
 				if (extract_header(*diter) == "be") {
 					// invert subject and object for the verb "to be" (consistently with Match )
@@ -427,9 +402,6 @@ boost::tuple<string, string, string> percolated_reference_verb_subj_obj = get_re
 						obj_refs_[ref] = true;
 					}
 					if (!shortfind(subj_refs_, oref)) {
-						if (debug) {
-							cout << "Rules_INVERTED_SUBJ_REF:::" << oref << endl;
-						}
 						subj_refs_[oref] = true;
 					}
 				}
@@ -654,9 +626,6 @@ vector<string> Rules::getRefFromName(const string &name) const
 
 bool Rules::refIsSubj(const string &str) const
 {
-	if(debug) {
-		cout << "REF_IS_SUBJ::: " << subj_refs_.size() << endl;
-	}
 	CMapStBool::const_iterator miter = subj_refs_.find(str);
 	if (miter != subj_refs_.end()) {
 		return true;

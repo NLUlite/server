@@ -419,9 +419,6 @@ void WisdomServer::create_discourses_from_string(string str, int global_num, Wis
 		string line(c_line);
 		if (line.find("[%") != string::npos && line.rfind("%]") != string::npos) {
 			link = get_link(line);
-			if (debug) {
-				cout << "DESCRIPTION::: " << link << endl;
-			}
 			if (data.size()) {
 			     drt_collection *dc;
 			     if (link.size()) {
@@ -442,9 +439,6 @@ void WisdomServer::create_discourses_from_string(string str, int global_num, Wis
 	}
 	if (data.size()) {
 		drt_collection dc(data, global_num, Context(), pi_, link);
-		if (debug) {
-			cout << "DESCRIPTION2::: " << link << endl;
-		}
 		w->addDiscourse(dc);
 	}
 }
@@ -601,18 +595,12 @@ string WisdomServer::process_input(string input)
 		string ID_str      = extract_string(intro, "ID");
 		string from_ID_str = extract_string(intro, "from_ID");
 
-		if(debug) {
-			cout << "ALL_ID::: " << ID_str << " " << from_ID_str << endl;
-		}
 
 		string question_ID_str = get_new_question_ID();
 
 		ArbiterAnswer ra = w_[ID_str].ask(w_[from_ID_str].getQuestions(), question_ID_str); // compute the question
 		string answer_str = get_string_answer(ra, question_ID_str); // Format the answer as a readable string
 
-		if(debug) {
-			std::cerr << "COMB_ANSWERS::: " << ra.getAnswers().size() << endl;
-		}
 
 		return answer_str;
 
@@ -643,10 +631,6 @@ string WisdomServer::process_input(string input)
 		DrtVect drtvect = create_drtvect(drs_str);
 		drt drs(drtvect);
 
-		if (debug) {
-			cout << "MATCH_DRS:::" << drs_str << endl;
-			cout << "MATCH_DRS2:::" << question << endl;
-		}
 
 		int ID = extract_ID(intro);
 		string ID_str = boost::lexical_cast<string>(ID);
@@ -674,9 +658,6 @@ string WisdomServer::process_input(string input)
 		string intro = input.substr(0, sd);
 		string data = input.substr(sd + 1, ed);
 
-		if (debug) {
-			cout << "DATA::: " << data << endl;
-		}
 
 		if (data.size() && data.at(data.size() - 1) == '\n')
 			data.at(data.size() - 1) = '.';

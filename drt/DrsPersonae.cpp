@@ -92,10 +92,6 @@ static bool shortfind(const MapStBool &mapp, const SPAction &a, const string &el
 	MapStBool::const_iterator miter = mapp.find(element);
 	if (miter != mapp.end()) {
 		vector<SPAction> action_vect = miter->second;
-		if (debug) {
-			cout << "IN_MAP:: ";
-			print_vector(action_vect);
-		}
 		if (shortfind(action_vect, a))
 			return true;
 	}
@@ -489,10 +485,6 @@ boost::shared_ptr<Action> Persona::addAction(const Action &a)
 		string verb_name = a.getVerb();
 		string verb_ref = a.getRef();
 
-		if (debug) {
-			cout << "LINK2::: " << a.getLink() << endl;
-			cout << "ADDING_ACTION::: " << verb_name << " " << verb_ref << endl;
-		}
 		verb_to_actions_[verb_name] = pa;
 		ref_to_actions_[verb_ref] = pa;
 	}
@@ -556,10 +548,6 @@ static vector<DrtPred> get_specification_from_pred(const vector<DrtPred> &preds,
 	vector<DrtPred> to_return = get_elements_next_of(preds, pred);
 	to_return = filter_first_specification(to_return);
 
-	if (debug) {
-		cout << "SPECIFICATIONS::: ";
-		print_vector(to_return);
-	}
 
 	return to_return;
 }
@@ -569,10 +557,6 @@ static bool is_subordinate_of_verb(const DrtVect &pre_drt, const string &subord_
 	vector<DrtPred>::const_iterator piter = pre_drt.begin();
 	vector<DrtPred>::const_iterator pend = pre_drt.end();
 
-	if(debug) {
-		cout << "IS_SUBORD::: " << subord_ref << endl;
-		print_vector(pre_drt);
-	}
 
 	for (; piter != pend; ++piter) {
 		//if(piter->pred().begin()->str == "@SUBORD") {
@@ -584,9 +568,6 @@ static bool is_subordinate_of_verb(const DrtVect &pre_drt, const string &subord_
 			string second_tag = extract_second_tag(*piter);
 			if (second_tag == subord_ref) {
 
-				if(debug) {
-					cout << "SUBORD_CANDIDATES::: " << *piter << endl;
-				}
 
 				*candidate_subord_pred = *piter;
 				return true;
@@ -678,10 +659,6 @@ static int find_prep_with_target(vector<DrtPred> &pre_drt, string from_str)
 static boost::tuple<string, string, string> get_reference_percolated_to_verb(vector<DrtPred> &pre_drt, int n)
 /// Implement a recursive algorithm !!!
 {
-	if (debug) {
-		cout << "PERCOLATING::: ";
-		print_vector(pre_drt);
-	}
 
 	boost::tuple<string, string, string> to_return(
 			boost::make_tuple(extract_first_tag(pre_drt.at(n)), extract_subject(pre_drt.at(n)),
@@ -703,10 +680,6 @@ static boost::tuple<string, string, string> get_reference_percolated_to_verb(vec
 		m = find_verb_with_object(pre_drt, from_str);
 	}
 
-	if (debug) {
-		cout << "PERCOLATING2::: ";
-		cout << m << endl;
-	}
 
 	if (m != -1) { // There might not be such a verb
 		string verb_str = extract_first_tag(pre_drt.at(m));
@@ -858,10 +831,6 @@ SPAction DrsPersonae::addAction(const DrtVect &drtpreds, const DrtPred &pred, in
 	tmp_action.setSubordinate(is_subord_trigger);
 	///
 
-	if (debug) {
-		cout << "TMP_ACTION::: " << verb_ref << " " << ref << " " << link_ << " " << is_subord_trigger << endl;
-		print_vector(tmp_preds);
-	}
 
 	string verb_name = extract_header(pred);
 	tmp_action.addVerb(verb_name);
@@ -883,9 +852,6 @@ SPAction DrsPersonae::addAction(const DrtVect &drtpreds, const DrtPred &pred, in
 			if (pers_iter != personae_.end()) {
 				//pers_iter->second.addName(obj_name);
 				pers_iter->second.addPred(pred_object.at(k));
-				if (debug) {
-					cout << "BE_SUBJ::: " << ref << " " << object.at(k) << " " << pred_object.at(k) << endl;
-				}
 			}
 		}
 	}
@@ -903,9 +869,6 @@ SPAction DrsPersonae::addAction(const DrtVect &drtpreds, const DrtPred &pred, in
 			if (pers_iter != personae_.end()) {
 				//pers_iter->second.addName(subj_name);
 				pers_iter->second.addPred(pred_subject.at(k));
-				if (debug) {
-					cout << "BE_OBJ::: " << oref << " " << subject.at(k) << endl;
-				}
 			}
 		}
 	}
@@ -947,37 +910,18 @@ SPAction DrsPersonae::addAction(const DrtVect &drtpreds, const DrtPred &pred, in
 	pa = pers_iter->second.addAction(tmp_action);
 
 	if (!shortfind(subj_refs_, pa, ref)) {
-		if (debug) {
-			cout << "Personae_SUBJ_REF:::" << ref << " " << pa->getRef() << endl;
-		}
 		subj_refs_[ref].push_back(pa);
 	}
 	if (!shortfind(obj_refs_, pa, oref)) {
 		obj_refs_[oref].push_back(pa);
-		if (debug) {
-			cout << "Personae_OBJ_REF:::" << oref << " " << pa->getRef() << endl;
-		}
 	}
 	if (extract_header(pred) == "be") {
-		if (debug) {
-			cout << "PERS_BE:::" << pa->getRef() << endl;
-			DrtVect tmp_drtvect = drtpreds;
-			print_vector(tmp_drtvect);
-		}
 		// invert subject and object for the verb "to be" (consistently with Match )
 		if (!shortfind(obj_refs_, pa, ref)) {
 			obj_refs_[ref].push_back(pa);
-			if (debug) {
-				vector<SPAction> spvect = obj_refs_[ref];
-				print_vector(spvect);
-				cout << "Personae_INVERTED_OBJ_REF:::" << ref << " " << pa->getRef() << endl;
-			}
 		}
 		if (!shortfind(subj_refs_, pa, oref)) {
 			subj_refs_[oref].push_back(pa);
-			if (debug) {
-				cout << "Personae_INVERTED_SUBJ_REF:::" << oref << " " << pa->getRef() << endl;
-			}
 		}
 	}
 
@@ -988,9 +932,6 @@ SPAction DrsPersonae::addAction(const DrtVect &drtpreds, const DrtPred &pred, in
 		if(fref == ref || fref == oref)
 			continue;
 		name_refs_[fref].push_back(pa);
-		if (debug) {
-			cout << "Personae_NAME_REF:::" << fref << " " << pa->getRef() << endl;
-		}
 	}
 	return pa;
 }
@@ -1014,9 +955,6 @@ void DrsPersonae::compute()
 		// extract the references from names
 		for (; diter != dend; ++diter, ++m) {
 			if (diter->is_name()) {
-				if (debug) {
-					cout << "NAME_DRS::: " << *diter << endl;
-				}
 				string ref = extract_first_tag(*diter);
 				if (ref.size() == 0)
 					continue; // just a safety check
@@ -1028,23 +966,11 @@ void DrsPersonae::compute()
 				names_to_refs_[diter->name()].push_back(ref);
 
 				if (pers_iter == personae_.end()) {
-					if (debug) {
-						cout << "ADDING_PRED11" << *diter << endl;
-					}
 					///-R references_.push_back(ref);
 					personae_[ref].setReference(ref);
 					personae_[ref].addPred(*diter);
-					if (debug) {
-						cout << "ADDING_PRED21" << *diter << endl;
-					}
 				} else {
-					if (debug) {
-						cout << "ADDING_PRED12" << *diter << endl;
-					}
 					pers_iter->second.addPred(*diter);
-					if (debug) {
-						cout << "ADDING_PRED22" << *diter << endl;
-					}
 				}
 			}
 			if (has_specification(*diter)) {
@@ -1055,10 +981,6 @@ void DrsPersonae::compute()
 				if (pers_iter != personae_.end()) {
 					vector<DrtPred> drtvect = get_specification_from_pred(drtpreds, *diter);
 					personae_[ref].addSpecification(drtvect);
-					if (debug) {
-						cout << "ADDING_SPEC:::" << endl;
-						print_vector(drtvect);
-					}
 				}
 			}
 			// save the adverbs as well
@@ -1092,9 +1014,6 @@ void DrsPersonae::compute()
 				if(is_subord_trigger) // This is a subordinate!
 					continue;
 
-				if(debug) {
-					puts("MAIN_SENTENCE2::: ");
-				}
 
 				vector<string> all_subj_refs = extract_all_subj_refs(drtpreds, *diter);
 				vector<string> all_obj_refs = extract_all_obj_refs(drtpreds, *diter);
@@ -1127,9 +1046,6 @@ void DrsPersonae::compute()
 				if(!is_subord_trigger) // This is not a subordinate!
 					continue;
 
-				if(debug) {
-					puts("SUBORD_SENTENCE2::: ");
-				}
 
 				vector<string> all_subj_refs = extract_all_subj_refs(drtpreds, *diter);
 				vector<string> all_obj_refs = extract_all_obj_refs(drtpreds, *diter);
@@ -1207,9 +1123,6 @@ void DrsPersonae::addPersonae(const DrsPersonae &dp)
 			Persona tmp_persona = piter->second;
 			string ref = tmp_persona.getReference();
 
-			if (debug) {
-				cout << "ADDING_REF::: " << ref << endl;
-			}
 
 			MapStPers::iterator this_piter = personae_.find(ref);
 			if (this_piter != personae_.end())
@@ -1221,9 +1134,6 @@ void DrsPersonae::addPersonae(const DrsPersonae &dp)
 	} else
 		personae_ = dp.personae_;
 
-	if (debug) {
-		cout << "ADDING_REF2::: " << endl;
-	}
 
 	// add the verb names in dp
 	if (verb_names_.size()) {
@@ -1232,9 +1142,6 @@ void DrsPersonae::addPersonae(const DrsPersonae &dp)
 	} else
 		verb_names_ = dp.verb_names_;
 
-	if (debug) {
-		cout << "ADDING_REF3::: " << endl;
-	}
 	// add the verb preds in dp
 	if (verb_preds_.size()) {
 		verb_preds_.insert(dp.verb_preds_.begin(), dp.verb_preds_.end());
@@ -1242,55 +1149,27 @@ void DrsPersonae::addPersonae(const DrsPersonae &dp)
 	} else
 		verb_preds_ = dp.verb_preds_;
 
-	if (debug) {
-		cout << "ADDING_REF4::: " << endl;
-	}
 
 	if (adverbs_.size()) {
 		adverbs_.insert(dp.adverbs_.begin(), dp.adverbs_.end());
 		//insert_in_map(adverbs_, dp.adverbs_ );
 	} else
 		adverbs_ = dp.adverbs_;
-	if (debug) {
-		cout << "ADDING_REF5::: " << endl;
-	}
 	// add the names_to_refs_ in dp
 	if (names_to_refs_.size()) {
 		names_to_refs_.insert(dp.names_to_refs_.begin(), dp.names_to_refs_.end());
 		//insert_in_map(names_to_refs_, dp.names_to_refs_ );
 	} else
 		names_to_refs_ = dp.names_to_refs_;
-	if (debug) {
-		cout << "ADDING_REF6::: " << endl;
-	}
-	if(debug) {
-		cout << "ADDING_SUBJ_REFS::: ";
-		cout << subj_refs_.size() << " " << dp.subj_refs_.size() << endl;
-	}
 	if (subj_refs_.size()) {
 		//subj_refs_.insert(dp.subj_refs_.begin(), dp.subj_refs_.end());
 		insert_in_map(subj_refs_, dp.subj_refs_ );
-		if(debug) {
-			cout << "ADDING_SUBJ_REFS2::: ";
-			cout << subj_refs_.size() << endl;
-		}
 	} else
 		subj_refs_ = dp.subj_refs_;
-	if (debug) {
-		cout << "ADDING_REF7::: " << endl;
-	}
-	if(debug) {
-		cout << "ADDING_OBJ_REFS::: ";
-		cout << obj_refs_.size() << " " << dp.obj_refs_.size() << endl;
-	}
 
 	if (obj_refs_.size()) {
 		//obj_refs_.insert(dp.obj_refs_.begin(), dp.obj_refs_.end());
 		insert_in_map(obj_refs_, dp.obj_refs_ );
-		if(debug) {
-			cout << "ADDING_OBJ_REFS2::: ";
-			cout << obj_refs_.size() << endl;
-		}
 	} else
 		obj_refs_ = dp.obj_refs_;
 	if (name_refs_.size()) {
@@ -1298,29 +1177,17 @@ void DrsPersonae::addPersonae(const DrsPersonae &dp)
 		insert_in_map(name_refs_, dp.name_refs_ );
 	} else
 		name_refs_ = dp.name_refs_;
-	if (debug) {
-		cout << "ADDING_REF8::: " << endl;
-	}
 	// add the persona_pointer_ in dp
 	if (persona_pointer_.size()) {
 		persona_pointer_.insert(dp.persona_pointer_.begin(), dp.persona_pointer_.end());
 	} else
 		persona_pointer_ = dp.persona_pointer_;
-	if (debug) {
-		cout << "ADDING_REF9::: " << endl;
-	}
 	// add the subordinates in dp
 	if (subord_verbs_.size()) {
 		subord_verbs_.insert(dp.subord_verbs_.begin(), dp.subord_verbs_.end());
 	} else
 		subord_verbs_ = dp.subord_verbs_;
-	if (debug) {
-		cout << "ADDING_REF10::: " << endl;
-	}
 	references_.insert(references_.end(), dp.references_.begin(), dp.references_.end());
-	if (debug) {
-		cout << "ADDING_REF11::: " << endl;
-	}
 }
 
 void DrsPersonae::addReferences(DrsPersonae dp)
@@ -1440,33 +1307,17 @@ vector<pair<DrtPred, Action> > DrsPersonae::getSubordinates(const string &verb_r
 	vector<pair<DrtPred, Action> > to_return;
 	MapStTuple::const_iterator sub_iter = subord_verbs_.find(verb_ref);
 
-	if (debug) {
-		puts("get_SUB::::");
-		cout << verb_ref << endl;
-	}
 	if (sub_iter != subord_verbs_.end()) {
-		if (debug) {
-			puts("get_SUB2::::");
-		}
 		vector<boost::tuple<DrtPred, string, string> > sub_tuple = sub_iter->second;
 		for (int m = 0; m < sub_tuple.size(); ++m) {
 			DrtPred type_pred = sub_tuple.at(m).get<0>();
 			string persona_ref = sub_tuple.at(m).get<1>();
 			string verb_ref = sub_tuple.at(m).get<2>();
-			if (debug) {
-				cout << "get_SUB2.5::: " << type_pred << " " << persona_ref << " " << verb_ref << endl;
-			}
 			try {
 				Persona p = this->getPersona(persona_ref);
 				Action act = p.getActionFromVerbRef(verb_ref);
 				to_return.push_back(make_pair(type_pred, act));
-				if (debug) {
-					cout << "get_SUB3::: " << type_pred << endl;
-				}
 			} catch (std::runtime_error &e) {
-				if (debug) {
-					cout << e.what() << endl;
-				}
 			}
 		}
 	}

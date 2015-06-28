@@ -227,9 +227,6 @@ bool is_AUX(const DrtPred &pred)
 bool is_delete(const DrtPred &pred)
 {
 	string head = extract_header(pred);
-	if (debug) {
-		cout << "IS_DELETE::: " << pred << ", " << head << endl;
-	}
 
 	if (head.find(":DELETE") != string::npos)
 		return true;
@@ -607,13 +604,7 @@ bool is_specification_end(const vector<DrtPred> pre_drt, int pos)
 		   ) {
 			string fref = extract_first_tag(pre_drt.at(n));
 			string sref = extract_second_tag(pre_drt.at(n));
-			if(debug) {
-				cout << "SPECIF::: " << fref << " " << sref << " " << pos_ref << endl;
-			}
 			if(sref == pos_ref && ref_is_name(fref)) {
-				if(debug) {
-					cout << "SPECIF2::: " << fref << " " << sref << " " << pos_ref << endl;
-				}		    
 				return true;
 			}
 		}
@@ -632,9 +623,6 @@ bool is_specification_of_NNP(const vector<DrtPred> pre_drt, int pos)
 		   ) {
 			string fref = extract_first_tag(pre_drt.at(n));
 			string sref = extract_second_tag(pre_drt.at(n));
-			if(debug) {
-				cout << "SPECIF::: " << fref << " " << sref << " " << pos_ref << endl;
-			}
 			if(sref == pos_ref && ref_is_name(fref)) {
 				int m= find_name_with_string(pre_drt,fref);
 				if(m == -1)
@@ -1194,13 +1182,6 @@ bool verb_is_singular(DrtPred pred, vector<DrtPred> speech)
 				string lemma = tagg->get_info()->get_conj(header, "NNS");
 				if (lemma == "")
 					lemma = header;
-				if (debug) {
-					cout << "VSING::: " << fref << " " << header
-						<< " " << speech.at(n).is_plural()
-						<< " " << lemma
-						<< " " << d->has_synset(lemma)
-						<< endl;
-				}
 				if (fref == subj_ref && (d->has_synset(lemma) || is_generic(header)) && speech.at(n).is_plural()) {
 					return false;
 				}
@@ -1217,9 +1198,6 @@ bool verb_is_singular(DrtPred pred, vector<DrtPred> speech)
 			if (speech.at(n).is_PRP()) {
 				string fref = extract_first_tag(speech.at(n));
 				string header = extract_header(speech.at(n));
-				if (debug) {
-					cout << "VSING2::: " << fref << " " << header << " " << speech.at(n).is_plural() << " " << endl;
-				}
 				if (fref == subj_ref && (header == "he" || header == "she" || header == "it")) {
 					return true;
 				}
@@ -1372,11 +1350,6 @@ vector<DrtPred> substitute_ref_safe(vector<DrtPred> &pre_drt, const string &from
 			}
 		}
 		predicates.at(n).implant_children(children);
-		if(debug) {
-			cout << "SUBST::: ";
-			print_vector(children);
-			print_vector(predicates);
-		}
 	}
 	return predicates;
 }
@@ -1394,11 +1367,6 @@ vector<DrtPred> substitute_ref_unsafe(vector<DrtPred> &pre_drt, const string &fr
 			}
 		}
 		predicates.at(n).implant_children(children);
-		if(debug) {
-			cout << "SUBST22::: ";
-			print_vector(children);
-			print_vector(predicates);
-		}
 	}
 	return predicates;
 }
